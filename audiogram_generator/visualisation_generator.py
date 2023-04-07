@@ -137,23 +137,24 @@ class AnimationGenerator:
             is_odd = True
         else:
             idx = int(len(y_channel) / 2)
-        y_half = y_channel[idx]
+        y_half = y_channel[:idx]
         y_half_reversed = [y_half[-i] for i in range(1, len(y_half) + 1)]
         if is_odd:
             y_half_reversed.append(y_half_reversed[-1])
         y_symmetric = np.concatenate((y_half, np.array(y_half_reversed)))
+        assert y_symmetric[0] == y_symmetric[-1]
 
         return y_symmetric
 
     def __get_symmetric_savitzky_data(self, waves):
         symmetric_savitzky_data = {
             'marc': {
-                'small': savitzky_golay(self.__symmetrize_wave(waves['small'][0])),
-                'large': savitzky_golay(self.__symmetrize_wave(waves['large'][0]))
+                'small': self.__symmetrize_wave(savitzky_golay(waves['small'][0])),
+                'large': self.__symmetrize_wave(savitzky_golay(waves['large'][0]))
             },
             'giulia': {
-                'small': savitzky_golay(self.__symmetrize_wave(waves['small'][1])),
-                'large': savitzky_golay(self.__symmetrize_wave(waves['large'][1]))
+                'small': self.__symmetrize_wave(savitzky_golay(waves['small'][1])),
+                'large': self.__symmetrize_wave(savitzky_golay(waves['large'][1]))
             }
         }
         return symmetric_savitzky_data
@@ -231,7 +232,7 @@ class AnimationGenerator:
 
         duration = self.wavefile.getnframes() / self.wavefile.getframerate()
         n_for_x = int(1 * self.rate / self.fps) - self.wavefile.tell()
-        x = np.linspace(0, self.window, n_for_x * 2)
+        x = np.linspace(0, self.window, n_for_x)
 
         self.__set_default_lines(ax, x)
 
@@ -250,7 +251,6 @@ class AnimationGenerator:
             y = np.array(struct.unpack("%dh" % (len(data) / self.sample_size), data))
 
             if len(y) != 2 * len(x):
-                print('EARLY RETURN! -> len(y) =', len(y), 'len(x) =', len(x), 'N =', N, 't =', t)
                 return self.__plot_to_npimage(fig)
 
             waves = {
