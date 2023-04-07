@@ -4,6 +4,7 @@
 import math
 import wave
 import struct
+import pathlib
 import numpy as np
 import matplotlib.pyplot as plt
 from statistics import mean
@@ -14,7 +15,7 @@ from audiogram_generator.audio_visualiser_scripts.savitzky_golay import savitzky
 from audiogram_generator.audio_visualiser_scripts.polar_coordinates_converter \
     import convert_to_polar_coordinates
 
-root = '/Users/SeverinBurg/Desktop/xPlain/code'
+root_dir_path = str(pathlib.Path(__file__).parent.parent) + '/'
 
 class AnimationClip(VideoClip):
     def __init__(self, make_frame, fps, duration, audio_file,
@@ -50,7 +51,7 @@ class AnimationClip(VideoClip):
 class AnimationGenerator:
     def __init__(self, audio_joined_mono, audio_enhanced):
         self.audio_file_enhanced = f'{audio_enhanced}.wav'
-        self.wavefile_path = f'{root}{audio_joined_mono}.wav'
+        self.wavefile_path = f'{root_dir_path}{audio_joined_mono}.wav'
         self.wavefile = wave.open(self.wavefile_path, 'rb')
         self.rate = 44100
         self.fps = 25

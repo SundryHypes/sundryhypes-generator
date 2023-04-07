@@ -1,6 +1,7 @@
 # Copyright Severin Josef Burg 2023
 # Any unauthorised usage forbidden
 
+import pathlib
 import os
 
 from config import set_up_logging
@@ -15,7 +16,8 @@ def delete_tmp_files():
     folders = ['audio_files', 'video_files', 'text_files']
 
     for folder in folders:
-        path = f'/Users/SeverinBurg/Desktop/xPlain/code/tmp/{folder}'
+        current_file_dir_path = str(pathlib.Path(__file__).parent) + '/'
+        path = current_file_dir_path + f'tmp/{folder}'
         for file_name in os.listdir(path):
             file = f'{path}/{file_name}'
             if os.path.isfile(file):

@@ -5,6 +5,7 @@ import json
 import random
 import string
 import logging
+import pathlib
 import datetime
 import os.path as op
 from moviepy import editor
@@ -98,7 +99,8 @@ def generate_video_with_captions(visualisation_clip, audio_files, text_files, ti
     )
     subclips.append(title_clip)
 
-    background_file_path = '/Users/SeverinBurg/Desktop/xPlain/code/assets/background.png'
+    root_dir_path = str(pathlib.Path(__file__).parent.parent) + '/'
+    background_file_path = root_dir_path + 'assets/background.png'
     background_clip = editor.ImageClip(background_file_path)
     background_clip.set_start(0)
     background_clip.set_duration(visualisation_clip.duration)

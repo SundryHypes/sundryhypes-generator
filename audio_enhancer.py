@@ -4,6 +4,7 @@
 import json
 import shutil
 import logging
+import pathlib
 import requests
 from requests.auth import HTTPBasicAuth
 from time import sleep
@@ -115,7 +116,8 @@ def wait_for_completion(headers, job_id):
 def download_file(headers, dolby_output_path):
     request_url = 'https://api.dolby.com/media/output'
 
-    output_path = '/Users/SeverinBurg/Desktop/xPlain/code/output/dolby_enhancement'
+    root_dir_path = str(pathlib.Path(__file__).parent.parent) + '/'
+    output_path = root_dir_path + 'output/dolby_enhancement'
 
     args = {
         'url': dolby_output_path,

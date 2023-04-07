@@ -3,6 +3,7 @@
 
 import random
 import string
+import pathlib
 
 from audiogram_generator.visualisation_generator import AnimationGenerator
 from audiogram_generator.captions_generator import generate_video_with_captions
@@ -45,7 +46,8 @@ def group_words(line, name, min_length_string=17, max_length_string=25):
 
 def write_text_to_file(text):
     filename = ''.join(random.choices(string.ascii_lowercase, k=5))
-    file_path = f'/Users/SeverinBurg/Desktop/xPlain/code/tmp/text_files/{filename}.txt'
+    root_dir_path = str(pathlib.Path(__file__).parent.parent) + '/'
+    file_path = root_dir_path + f'tmp/text_files/{filename}.txt'
     output_file = open(file_path, "w")
     output_file.write(text)
     output_file.close()
