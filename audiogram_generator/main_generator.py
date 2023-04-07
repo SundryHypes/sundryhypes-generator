@@ -30,9 +30,8 @@ def group_words(line, name, min_length_string=17, max_length_string=25):
         if word in words_to_exclude:
             continue
         last_word_group = grouped_words[-1]
-        if len(last_word_group) < min_length_string:
-            grouped_words[-1] += word if len(last_word_group) == 0 else ' ' + word
-        elif len(last_word_group) + len(word) < max_length_string:
+        if len(last_word_group) < min_length_string \
+                or len(last_word_group) + len(word) < max_length_string:
             grouped_words[-1] += word if len(last_word_group) == 0 else ' ' + word
         else:
             if len(grouped_words) % 2 == 0:
@@ -53,8 +52,17 @@ def write_text_to_file(text):
 
     return file_path
 
+def remove_awkward_comma_names(dialogue):
+    punctuation_signs = ['.', ',', ';', ':', '!', '?', ' ']
+    hosts = ['Marc', 'Giulia']
+    for host in hosts:
+        for sign in punctuation_signs:
+            dialogue = dialogue.replace(f', {host}{sign}', sign)
+
+    return dialogue
 
 def generate_textfile(podcast_dialogue):
+    podcast_dialogue = remove_awkward_comma_names(podcast_dialogue)
     lines = podcast_dialogue.split('\n')
     lines = [line.strip() for line in lines]
 
