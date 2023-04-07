@@ -51,9 +51,9 @@ def generate_text_clip(from_t, to_t, txt, position, txt_color='#333335', fontsiz
     elif position == 'right_caption':
         text_position = (0.59, 0.78)
     elif position == 'episode_number':
-        text_position = ('center', 0.02)
+        text_position = ('center', 0.0356)
     elif position == 'title':
-        text_position = ('center', 0.05)
+        text_position = ('center', 0.089)
     else:
         raise Exception('Unknown position for text')
 
@@ -117,7 +117,7 @@ def generate_video_with_captions(visualisation_clip, audio_files, text_files, ti
 
     logger.info(f'Saving final clip')
 
-    # final_clip.save_frame("frame.png", t=1)
-    final_clip.write_videofile(op.join('output', 'final.mp4'),
-                               temp_audiofile="temp-audio.m4a", remove_temp=True,
-                               codec="libx264", audio_codec="aac")
+    final_clip.save_frame("frame.png", t=1)
+    # final_clip.write_videofile(op.join('output', 'final.mp4'),
+    #                            temp_audiofile="temp-audio.m4a", remove_temp=True,
+    #                            codec="libx264", audio_codec="aac")
