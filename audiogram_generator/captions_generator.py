@@ -23,9 +23,7 @@ def generate_text_alignment_with_timestamps(audio_file_path, script_file_path):
                     u"|task_adjust_boundary_nonspeech_min=0.0100" \
                     u"|task_adjust_boundary_nonspeech_string=REMOVE" \
                     u"|is_audio_file_detect_head_max=20.0" \
-                    u"|is_audio_file_detect_head_min=0" \
-                    u"|is_audio_file_detect_tail_max=20.0" \
-                    u"|is_audio_file_detect_tail_min=0.0"
+                    u"|is_audio_file_detect_head_min=0"
     task = Task(config_string=config_string)
     task.audio_file_path_absolute = f'.{audio_file_path}.wav'
     task.text_file_path_absolute = script_file_path

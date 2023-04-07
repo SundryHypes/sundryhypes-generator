@@ -87,16 +87,21 @@ def combine_audio_files(list_of_files):
     giulia = AudioSegment.empty().set_frame_rate(frame_rate)
     marc = AudioSegment.empty().set_frame_rate(frame_rate)
 
-    for file in list_of_files:
+    for i, file in enumerate(list_of_files):
         segment = AudioSegment.from_file(file, audio_format)
+        if i == len(list_of_files) - 1:
+            if 'giulia' in file:
+                giulia += segment
+            elif 'marc' in file:
+                marc += segment
 
-        if 'giulia' in file:
-            giulia += segment
-            marc += AudioSegment.silent(duration=len(segment), frame_rate=frame_rate)
-
-        elif 'marc' in file:
-            giulia += AudioSegment.silent(duration=len(segment), frame_rate=frame_rate)
-            marc += segment
+        else:
+            if 'giulia' in file:
+                giulia += segment
+                marc += AudioSegment.silent(duration=len(segment), frame_rate=frame_rate)
+            elif 'marc' in file:
+                giulia += AudioSegment.silent(duration=len(segment), frame_rate=frame_rate)
+                marc += segment
 
     giulia_all_right = giulia.pan(+1.0)
     giulia_more_right = giulia.pan(+0.2)

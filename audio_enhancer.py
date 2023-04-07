@@ -116,7 +116,7 @@ def wait_for_completion(headers, job_id):
 def download_file(headers, dolby_output_path):
     request_url = 'https://api.dolby.com/media/output'
 
-    root_dir_path = str(pathlib.Path(__file__).parent.parent) + '/'
+    root_dir_path = str(pathlib.Path(__file__).parent) + '/'
     output_path = root_dir_path + 'output/dolby_enhancement'
 
     args = {

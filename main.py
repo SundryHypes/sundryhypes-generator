@@ -24,6 +24,16 @@ def delete_tmp_files():
                 os.remove(file)
 
 
+def remove_awkward_comma_names(dialogue):
+    punctuation_signs = ['.', ',', ';', ':', '!', '?', ' ']
+    hosts = ['Marc', 'Giulia']
+    for host in hosts:
+        for sign in punctuation_signs:
+            dialogue = dialogue.replace(f', {host}{sign}', sign)
+
+    return dialogue
+
+
 def main():
     logger = set_up_logging()
     logger.info('Start execution')
@@ -34,6 +44,7 @@ def main():
     if not discussed_recently:
         episode_number = add_entry_to_record(article_title)
         podcast_dialogue = generate_dialogue_based_on_topic(article_title)
+        podcast_dialogue = remove_awkward_comma_names(podcast_dialogue)
         path_to_wav_files = convert_dialogue_to_audio(podcast_dialogue)
         generate_audiogram(path_to_wav_files, podcast_dialogue, article_title, episode_number)
         # delete_tmp_files()

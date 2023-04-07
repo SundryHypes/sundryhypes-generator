@@ -54,17 +54,7 @@ def write_text_to_file(text):
 
     return file_path
 
-def remove_awkward_comma_names(dialogue):
-    punctuation_signs = ['.', ',', ';', ':', '!', '?', ' ']
-    hosts = ['Marc', 'Giulia']
-    for host in hosts:
-        for sign in punctuation_signs:
-            dialogue = dialogue.replace(f', {host}{sign}', sign)
-
-    return dialogue
-
 def generate_textfile(podcast_dialogue):
-    podcast_dialogue = remove_awkward_comma_names(podcast_dialogue)
     lines = podcast_dialogue.split('\n')
     lines = [line.strip() for line in lines]
 
