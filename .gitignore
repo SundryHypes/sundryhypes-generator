@@ -8,3 +8,4 @@ assets/google_key.json
 *.json
 *.pyc
 *.log
+*.idea
