@@ -1,6 +1,7 @@
 # Copyright Severin Josef Burg 2023
 # Any unauthorised usage forbidden
 
+import math
 import wave
 import struct
 import numpy as np
@@ -128,10 +129,19 @@ class AnimationGenerator:
         }
 
     def __symmetrize_wave(self, y_channel):
-        idx = len(y_channel) / 2
-        y_half = y_channel[:int(idx)]
+        is_odd = False
+        len_y = len(y_channel)
+        if len_y % 2 != 0:
+            idx = math.floor(len_y / 2)
+            is_odd = True
+        else:
+            idx = int(len(y_channel) / 2)
+        y_half = y_channel[idx]
         y_half_reversed = [y_half[-i] for i in range(1, len(y_half) + 1)]
+        if is_odd:
+            y_half_reversed.append(y_half_reversed[-1])
         y_symmetric = np.concatenate((y_half, np.array(y_half_reversed)))
+
         return y_symmetric
 
     def __get_symmetric_savitzky_data(self, waves):
@@ -220,7 +230,7 @@ class AnimationGenerator:
 
         duration = self.wavefile.getnframes() / self.wavefile.getframerate()
         n_for_x = int(1 * self.rate / self.fps) - self.wavefile.tell()
-        x = np.linspace(0, self.window, n_for_x)
+        x = np.linspace(0, self.window, n_for_x * 2)
 
         self.__set_default_lines(ax, x)
 
