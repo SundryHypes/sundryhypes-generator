@@ -41,6 +41,11 @@ def add_entry_to_record(title: str):
 
 
 def is_topic_in_month(month, record, topic, year):
+    if not isinstance(month, str):
+        month = str(month)
+    if not isinstance(year, str):
+        year = str(year)
+
     if year not in record:
         return False
 
