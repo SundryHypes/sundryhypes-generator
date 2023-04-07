@@ -1,0 +1,10 @@
+
+assets/google_key.json
+*.wav
+*.mp3
+*.m4a
+*.mp4
+*.txt
+*.json
+*.pyc
+*.log
