@@ -14,7 +14,7 @@ from aeneas.task import Task
 from aeneas.executetask import ExecuteTask
 
 logger = logging.getLogger('Main_Logger')
-
+root_dir_path = str(pathlib.Path(__file__).parent.parent) + '/'
 
 def generate_text_alignment_with_timestamps(audio_file_path, script_file_path):
     logger.info(f'Force alignment of text to audio')
@@ -25,12 +25,13 @@ def generate_text_alignment_with_timestamps(audio_file_path, script_file_path):
                     u"|is_audio_file_detect_head_max=20.0" \
                     u"|is_audio_file_detect_head_min=0"
     task = Task(config_string=config_string)
-    task.audio_file_path_absolute = f'.{audio_file_path}.wav'
+
+    task.audio_file_path_absolute = root_dir_path + f'{audio_file_path}.wav'
     task.text_file_path_absolute = script_file_path
 
     filename = ''.join(random.choices(string.ascii_lowercase, k=5))
 
-    alignment_file_path = f'./tmp/text_files/{filename}.json'
+    alignment_file_path = root_dir_path + f'tmp/text_files/{filename}.json'
     task.sync_map_file_path_absolute = alignment_file_path
 
     ExecuteTask(task).execute()
@@ -51,9 +52,9 @@ def generate_text_clip(from_t, to_t, txt, position, txt_color='#333335', fontsiz
     elif position == 'right_caption':
         text_position = (0.59, 0.78)
     elif position == 'episode_number':
-        text_position = ('center', 0.0356)
+        text_position = ('center', 0.042)
     elif position == 'title':
-        text_position = ('center', 0.089)
+        text_position = ('center', 0.073)
     else:
         raise Exception('Unknown position for text')
 
@@ -97,7 +98,6 @@ def generate_video_with_captions(visualisation_clip, audio_files, text_files, ti
     )
     subclips.append(title_clip)
 
-    root_dir_path = str(pathlib.Path(__file__).parent.parent) + '/'
     background_file_path = root_dir_path + 'assets/background.png'
     background_clip = editor.ImageClip(background_file_path)
     background_clip.set_start(0)
@@ -117,7 +117,7 @@ def generate_video_with_captions(visualisation_clip, audio_files, text_files, ti
 
     logger.info(f'Saving final clip')
 
-    final_clip.save_frame("frame.png", t=1)
-    # final_clip.write_videofile(op.join('output', 'final.mp4'),
-    #                            temp_audiofile="temp-audio.m4a", remove_temp=True,
-    #                            codec="libx264", audio_codec="aac")
+    #final_clip.save_frame("frame.png", t=1)
+    final_clip.write_videofile(op.join('output', 'final.mp4'),
+                               temp_audiofile="temp-audio.m4a", remove_temp=True,
+                               codec="libx264", audio_codec="aac")
