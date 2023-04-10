@@ -97,7 +97,6 @@ class AnimationGenerator:
         plt.rcParams['savefig.dpi'] = 300
         plt.rcParams['figure.figsize'] = (self.width / dpi, self.height / dpi)
 
-
     def __assert_audio_file(self):
         assert self.wavefile.getnchannels() == self.channels
         assert self.wavefile.getsampwidth() == self.sample_size
@@ -208,6 +207,7 @@ class AnimationGenerator:
         """ Converts a matplotlib figure to a RGB frame after updating the canvas"""
         #  only the Agg backend now supports the tostring_rgb function
         from matplotlib.backends.backend_agg import FigureCanvasAgg
+        fig.dpi = 100
         canvas = FigureCanvasAgg(fig)
         canvas.draw()  # update/draw the elements
 

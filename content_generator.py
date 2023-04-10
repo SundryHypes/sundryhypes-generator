@@ -30,8 +30,8 @@ def get_instruction():
                   "insight into the topic. Thus, it is important that your script is comprehensive " \
                   "and answers any question which a listener might have about the topic. The text " \
                   "should be formatted as dialogue like the below:\n" \
-                  f"Giulia: Welcome to our podcast. My name is Giulia.\n" \
-                  f"Marc: And, my name is Marc."
+                  f"Marc: Welcome to our podcast. My name is Marc.\n" \
+                  f"Giulia: And, my name is Giulia."
 
     return instruction
 

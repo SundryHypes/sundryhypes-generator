@@ -7,7 +7,6 @@ import string
 import logging
 import pathlib
 import datetime
-import os.path as op
 from moviepy import editor
 from moviepy.video.fx.resize import resize
 from aeneas.task import Task
@@ -117,7 +116,7 @@ def generate_video_with_captions(visualisation_clip, audio_files, text_files, ti
 
     logger.info(f'Saving final clip')
 
-    #final_clip.save_frame("frame.png", t=1)
-    final_clip.write_videofile(op.join('output', 'final.mp4'),
+    # final_clip.save_frame("frame.png", t=1)
+    final_clip.write_videofile(f'{root_dir_path}output/final.mp4',
                                temp_audiofile="temp-audio.m4a", remove_temp=True,
                                codec="libx264", audio_codec="aac")
