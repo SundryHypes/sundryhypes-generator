@@ -59,9 +59,7 @@ def is_topic_in_month(month, record, topic, year):
     return False
 
 
-def check_if_topic_discussed_recently(title: str = None):
-    logger.info(f'Checking if "{title}" in archive')
-
+def check_if_topic_discussed_recently(titles):
     file = open('archive/record.json')
     record = json.load(file)
 
@@ -73,10 +71,15 @@ def check_if_topic_discussed_recently(title: str = None):
     current_month = format(today, '%B')
     last_month = format(shift_back_one_month, '%B')
 
-    topic_found = is_topic_in_month(current_month, record, title, year)
-    topic_found = topic_found or is_topic_in_month(
-        last_month, record, title, shift_back_one_month_year)
+    for title in titles:
+        logger.info(f'Checking if "{title}" in archive')
+        topic_found = is_topic_in_month(current_month, record, title, year)
+        topic_found = topic_found or is_topic_in_month(
+            last_month, record, title, shift_back_one_month_year)
 
-    file.close()
-    return topic_found
+        if not topic_found:
+            file.close()
+            return topic_found, title
+
+    return True, None
 

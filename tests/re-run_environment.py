@@ -13,12 +13,12 @@ audio_file_paths = {
 }
 
 text_file_paths = {
-    'Giulia': '/Users/SeverinBurg/Documents/GitHub/sundryhypes-generator/tmp/text_files/ypdsf.json',
-    'Marc': '/Users/SeverinBurg/Documents/GitHub/sundryhypes-generator/tmp/text_files/sczcl.json'
+    'Giulia': '/Users/SeverinBurg/Documents/GitHub/sundryhypes-generator/tmp/text_files/woryv.txt',
+    'Marc': '/Users/SeverinBurg/Documents/GitHub/sundryhypes-generator/tmp/text_files/sumfh.txt'
 }
 
-title = 'The Super Mario Bros. Movie'
-episode_number = 3
+title = 'Dalai Lama'
+episode_number = 5
 
 generator = AnimationGenerator(audio_file_paths['Joined_Mono'], audio_file_paths['Enhanced'])
 visualisation_clip = generator.get_animation_clip()

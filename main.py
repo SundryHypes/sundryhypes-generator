@@ -5,7 +5,7 @@ import pathlib
 import os
 
 from config import set_up_logging
-from ideas_finder import get_title_of_todays_trending_wiki_article
+from ideas_finder import get_title_of_todays_trending_wiki_articles
 from archive.archive_maintainer import check_if_topic_discussed_recently, add_entry_to_record
 from content_generator import generate_dialogue_based_on_topic
 from speech_synthesiser import convert_dialogue_to_audio
@@ -38,8 +38,8 @@ def main():
     logger = set_up_logging()
     logger.info('Start execution')
 
-    article_title = get_title_of_todays_trending_wiki_article()
-    discussed_recently = check_if_topic_discussed_recently(article_title)
+    trending_article_titles = get_title_of_todays_trending_wiki_articles()
+    discussed_recently, article_title = check_if_topic_discussed_recently(trending_article_titles)
 
     if not discussed_recently:
         episode_number = add_entry_to_record(article_title)
