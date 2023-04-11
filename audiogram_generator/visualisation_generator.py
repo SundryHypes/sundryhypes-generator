@@ -95,8 +95,8 @@ class AnimationGenerator:
         self.__assert_audio_file()
 
         self.dpi = 300
-        plt.rcParams['figure.dpi'] = 300
-        plt.rcParams['savefig.dpi'] = 300
+        plt.rcParams['figure.dpi'] = self.dpi
+        plt.rcParams['savefig.dpi'] = self.dpi
         plt.rcParams['figure.figsize'] = (self.width / self.dpi, self.height / self.dpi)
 
     def __assert_audio_file(self):
@@ -133,15 +133,19 @@ class AnimationGenerator:
     def __symmetrize_wave(self, y_channel):
         is_odd = False
         len_y = len(y_channel)
+
         if len_y % 2 != 0:
             idx = math.floor(len_y / 2)
             is_odd = True
         else:
             idx = int(len(y_channel) / 2)
+
         y_half = y_channel[:idx]
         y_half_reversed = [y_half[-i] for i in range(1, len(y_half) + 1)]
+
         if is_odd:
             y_half_reversed.append(y_half_reversed[-1])
+
         y_symmetric = np.concatenate((y_half, np.array(y_half_reversed)))
         assert y_symmetric[0] == y_symmetric[-1]
 
@@ -212,6 +216,7 @@ class AnimationGenerator:
 
         buf = canvas.buffer_rgba()
         image = np.frombuffer(buf, dtype=np.uint8)
+
         return image.reshape(self.height, self.width, 4)
 
     def __record_animation(self):

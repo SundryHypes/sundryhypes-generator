@@ -8,6 +8,8 @@ import pathlib
 from audiogram_generator.visualisation_generator import AnimationGenerator
 from audiogram_generator.captions_generator import generate_video_with_captions
 
+root_dir_path = str(pathlib.Path(__file__).parent.parent) + '/'
+
 
 def return_host_specific_phrases(name, lines, other_host_name):
     list_of_groups = []
@@ -46,7 +48,6 @@ def group_words(line, name, min_length_string=17, max_length_string=25):
 
 def write_text_to_file(text):
     filename = ''.join(random.choices(string.ascii_lowercase, k=5))
-    root_dir_path = str(pathlib.Path(__file__).parent.parent) + '/'
     file_path = root_dir_path + f'tmp/text_files/{filename}.txt'
     output_file = open(file_path, "w")
     output_file.write(text)

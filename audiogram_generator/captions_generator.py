@@ -87,8 +87,8 @@ def generate_video_with_captions(visualisation_clip, audio_files, text_files, ti
     today = datetime.date.today()
     episode_number = f'{number:03} / {today.year}'
     episode_number_clip = generate_text_clip(
-        0, visualisation_clip.duration, f'SUNDRY HYPES • {episode_number}', 'episode_number',
-        fontsize=25
+        0, visualisation_clip.duration, f'SUNDRY HYPES • {episode_number}',
+        'episode_number', fontsize=25
     )
     subclips.append(episode_number_clip)
 
@@ -113,12 +113,13 @@ def generate_video_with_captions(visualisation_clip, audio_files, text_files, ti
 
     subclips.insert(0, background_clip)
     subclips.insert(1, visualisation_clip)
-    final_clip = editor.CompositeVideoClip(subclips, use_bgclip=True)
+    final_clip = editor.CompositeVideoClip(subclips)
     final_clip = final_clip.with_duration(visualisation_clip.duration)
 
     logger.info(f'Saving final clip')
 
-    final_clip.save_frame("frame.png", t=1)
+    # final_clip.save_frame('frame.png', t=1, with_mask=False)
+    # final_clip.preview(fps=30)
     final_clip.write_videofile(f'{root_dir_path}output/final.mp4', threads=4, preset='ultrafast',
                                temp_audiofile="temp-audio.m4a", remove_temp=True,
-                               codec="h264_videotoolbox", audio_codec="aac")
+                               codec="libx264", audio_codec="aac")
