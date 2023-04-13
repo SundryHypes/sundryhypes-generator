@@ -38,7 +38,7 @@ def google_text_to_wav(count: int, host_name: str, text: str):
     )
     audio_config = tts.AudioConfig(
         audio_encoding=tts.AudioEncoding.LINEAR16, pitch=pitch, speaking_rate=speaking_rate,
-        effects_profile_id='large-home-entertainment-class-device'
+        effects_profile_id=['large-home-entertainment-class-device']
     )
 
     client = tts.TextToSpeechClient()

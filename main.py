@@ -35,20 +35,33 @@ def remove_awkward_comma_names(dialogue):
     return dialogue
 
 
+def read_podcast_dialogue_from_file():
+    root_dir_path = str(pathlib.Path(__file__).parent) + '/'
+    file_path = root_dir_path + f'output/dialogue.txt'
+    with open(file_path, 'r') as file:
+        podcast_dialogue = file.read()
+
+    return podcast_dialogue
+
 def main():
     logger = set_up_logging()
     logger.info('Start execution')
 
-    # article_titles = get_title_of_todays_trending_wiki_articles()
-    article_titles = search_term_on_wikipedia('Boston Marathon bombing')
+    article_titles = get_title_of_todays_trending_wiki_articles()
+    # article_titles = search_term_on_wikipedia('Boston Marathon bombing')
+
     discussed_recently, article_title = check_if_topic_discussed_recently(article_titles)
 
     if not discussed_recently:
         episode_number = add_entry_to_record(article_title)
+
         podcast_dialogue = generate_dialogue_based_on_topic(article_title)
+        # podcast_dialogue = read_podcast_dialogue_from_file()
+
         podcast_dialogue = remove_awkward_comma_names(podcast_dialogue)
         path_to_wav_files = convert_dialogue_to_audio(podcast_dialogue)
         generate_audiogram(path_to_wav_files, podcast_dialogue, article_title, episode_number)
+
         # delete_tmp_files()
 
     logger.info('Finish execution')
