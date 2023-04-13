@@ -8,12 +8,12 @@ import logging
 import pathlib
 import datetime
 from moviepy import editor
-from moviepy.video.fx.resize import resize
 from aeneas.task import Task
 from aeneas.executetask import ExecuteTask
 
 logger = logging.getLogger('Main_Logger')
 root_dir_path = str(pathlib.Path(__file__).parent.parent) + '/'
+
 
 def generate_text_alignment_with_timestamps(audio_file_path, script_file_path):
     logger.info(f'Force alignment of text to audio')
@@ -40,11 +40,11 @@ def generate_text_alignment_with_timestamps(audio_file_path, script_file_path):
     return alignment_file_path
 
 
-def generate_text_clip(from_t, to_t, txt, position, txt_color='#333335', fontsize=50,
-                       font='SF-Pro'):
+def generate_text_clip(from_t, to_t, txt, position, txt_color='#333335',
+                       fontsize=50, font='SF-Pro'):
     logger.info(f'Generating text clip for "{txt}"')
 
-    text_clip = editor.TextClip(txt, fontsize=fontsize, font=font, color=txt_color)
+    text_clip = editor.TextClip(txt, font_size=fontsize, font=font, color=txt_color)
 
     if position == 'left_caption':
         text_position = (0.21, 0.78)
@@ -57,9 +57,9 @@ def generate_text_clip(from_t, to_t, txt, position, txt_color='#333335', fontsiz
     else:
         raise Exception('Unknown position for text')
 
-    text_clip = text_clip.set_position(text_position, relative=True)
-    text_clip = text_clip.set_start(from_t)
-    text_clip = text_clip.set_end(to_t)
+    text_clip = text_clip.with_position(text_position, relative=True)
+    text_clip = text_clip.with_start(from_t)
+    text_clip = text_clip.with_end(to_t)
 
     return text_clip
 
@@ -87,8 +87,8 @@ def generate_video_with_captions(visualisation_clip, audio_files, text_files, ti
     today = datetime.date.today()
     episode_number = f'{number:03} / {today.year}'
     episode_number_clip = generate_text_clip(
-        0, visualisation_clip.duration, f'SUNDRY HYPES • {episode_number}', 'episode_number',
-        fontsize=25
+        0, visualisation_clip.duration, f'SUNDRY HYPES • {episode_number}',
+        'episode_number', fontsize=25
     )
     subclips.append(episode_number_clip)
 
@@ -98,10 +98,12 @@ def generate_video_with_captions(visualisation_clip, audio_files, text_files, ti
     subclips.append(title_clip)
 
     background_file_path = root_dir_path + 'assets/background.png'
-    background_clip = editor.ImageClip(background_file_path)
-    background_clip.set_start(0)
-    background_clip.set_duration(visualisation_clip.duration)
-    background_clip = resize(background_clip, width=1920, height=1080)
+    background_clip = editor.ImageClip(
+        background_file_path,
+        transparent=False,
+        duration=visualisation_clip.duration
+    )
+    background_clip.with_start(0)
 
     for (from_t, to_t), txt in text_fragments['Giulia']:
         subclips.append(generate_text_clip(from_t, to_t, txt, 'right_caption'))
@@ -112,11 +114,12 @@ def generate_video_with_captions(visualisation_clip, audio_files, text_files, ti
     subclips.insert(0, background_clip)
     subclips.insert(1, visualisation_clip)
     final_clip = editor.CompositeVideoClip(subclips)
-    final_clip = final_clip.set_duration(visualisation_clip.duration)
+    final_clip = final_clip.with_duration(visualisation_clip.duration)
 
     logger.info(f'Saving final clip')
 
-    # final_clip.save_frame("frame.png", t=1)
-    final_clip.write_videofile(f'{root_dir_path}output/final.mp4',
+    # final_clip.save_frame('frame.png', t=1, with_mask=False)
+    # final_clip.preview(fps=30)
+    final_clip.write_videofile(f'{root_dir_path}output/final.mp4', threads=4, preset='ultrafast',
                                temp_audiofile="temp-audio.m4a", remove_temp=True,
                                codec="libx264", audio_codec="aac")

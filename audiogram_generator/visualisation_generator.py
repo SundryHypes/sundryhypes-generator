@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 from statistics import mean
 from moviepy.audio.io.AudioFileClip import AudioFileClip
 from moviepy.video.VideoClip import VideoClip
+from matplotlib.backends.backend_agg import FigureCanvasAgg
 
 from audiogram_generator.audio_visualiser_scripts.savitzky_golay import savitzky_golay
 from audiogram_generator.audio_visualiser_scripts.polar_coordinates_converter \
@@ -39,8 +40,8 @@ class AnimationClip(VideoClip):
             self.make_frame = lambda t: make_frame(t)[:, :, :3]
             self.size = self.get_frame(0).shape[:2][::-1]
             self.make_mask = lambda t: make_frame(t)[:, :, 3] / 255.0
-            self.mask = (VideoClip(ismask=True, make_frame=self.make_mask)
-                         .set_duration(self.duration))
+            self.mask = (VideoClip(is_mask=True, make_frame=self.make_mask)
+                         .with_duration(self.duration))
             self.mask.fps = self.fps
 
         else:
@@ -93,9 +94,10 @@ class AnimationGenerator:
 
         self.__assert_audio_file()
 
-        dpi = plt.rcParams['figure.dpi']
-        plt.rcParams['savefig.dpi'] = 300
-        plt.rcParams['figure.figsize'] = (self.width / dpi, self.height / dpi)
+        self.dpi = 300
+        plt.rcParams['figure.dpi'] = self.dpi
+        plt.rcParams['savefig.dpi'] = self.dpi
+        plt.rcParams['figure.figsize'] = (self.width / self.dpi, self.height / self.dpi)
 
     def __assert_audio_file(self):
         assert self.wavefile.getnchannels() == self.channels
@@ -113,33 +115,37 @@ class AnimationGenerator:
         self.plots['marc'] = {
             'small': ax.plot(polar_radius['100']['x'] + self.plot_positions['marc']['small']['x'],
                              polar_radius['100']['y'] + self.plot_positions['marc']['small']['y'],
-                             linewidth=5, color='#EF5224'),
+                             linewidth=2, color='#EF5224'),
             'large': ax.plot(polar_radius['110']['x'] + self.plot_positions['marc']['large']['x'],
                              polar_radius['110']['y'] + self.plot_positions['marc']['large']['y'],
-                             linewidth=5, color='#05539E')
+                             linewidth=2, color='#05539E')
         }
 
         self.plots['giulia'] = {
             'small': ax.plot(polar_radius['095']['x'] + self.plot_positions['giulia']['small']['x'],
                              polar_radius['095']['y'] + self.plot_positions['giulia']['small']['y'],
-                             linewidth=5, color='#EF5224'),
+                             linewidth=2, color='#EF5224'),
             'large': ax.plot(polar_radius['100']['x'] + self.plot_positions['giulia']['large']['x'],
                              polar_radius['100']['y'] + self.plot_positions['giulia']['large']['y'],
-                             linewidth=5, color='#F2BB2A')
+                             linewidth=2, color='#F2BB2A')
         }
 
     def __symmetrize_wave(self, y_channel):
         is_odd = False
         len_y = len(y_channel)
+
         if len_y % 2 != 0:
             idx = math.floor(len_y / 2)
             is_odd = True
         else:
             idx = int(len(y_channel) / 2)
+
         y_half = y_channel[:idx]
         y_half_reversed = [y_half[-i] for i in range(1, len(y_half) + 1)]
+
         if is_odd:
             y_half_reversed.append(y_half_reversed[-1])
+
         y_symmetric = np.concatenate((y_half, np.array(y_half_reversed)))
         assert y_symmetric[0] == y_symmetric[-1]
 
@@ -204,21 +210,14 @@ class AnimationGenerator:
         )
 
     def __plot_to_npimage(self, fig):
-        """ Converts a matplotlib figure to a RGB frame after updating the canvas"""
-        #  only the Agg backend now supports the tostring_rgb function
-        from matplotlib.backends.backend_agg import FigureCanvasAgg
-        fig.dpi = 100
+        fig.dpi = self.dpi
         canvas = FigureCanvasAgg(fig)
-        canvas.draw()  # update/draw the elements
+        canvas.draw()
 
-        # get the width and the height to resize the matrix
-        l, b, w, h = canvas.figure.bbox.bounds
-        w, h = int(w), int(h)
-
-        #  exports the canvas to a string buffer and then to a numpy nd.array
         buf = canvas.buffer_rgba()
         image = np.frombuffer(buf, dtype=np.uint8)
-        return image.reshape(h, w, 4)
+
+        return image.reshape(self.height, self.width, 4)
 
     def __record_animation(self):
         fig = plt.figure(facecolor='none', edgecolor='white')

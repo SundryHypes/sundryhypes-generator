@@ -3,8 +3,10 @@
 
 import openai
 import logging
+import pathlib
 
 logger = logging.getLogger('Main_Logger')
+root_dir_path = str(pathlib.Path(__file__).parent) + '/'
 
 
 def send_request(messages):
@@ -92,6 +94,15 @@ def retrieve_next_host(dialogue, female_host_name='Giulia', male_host_name='Marc
         return male_host_name
 
 
+def write_dialogue_to_file(dialogue):
+    logger.info('Saving dialogue to file...')
+
+    file_path = root_dir_path + f'output/dialogue.txt'
+    output_file = open(file_path, "w")
+    output_file.write(dialogue)
+    output_file.close()
+
+
 def generate_dialogue_based_on_topic(topic):
     logger.info(f'Generating dialogue for topic: "{topic}"')
 
@@ -124,5 +135,7 @@ def generate_dialogue_based_on_topic(topic):
         requests_buffer, last_part, get_outro_prompt(next_host), dialogue)
 
     logger.info(f'Successfully generated dialogue with {len(dialogue)} characters')
+
+    write_dialogue_to_file(dialogue)
 
     return dialogue
