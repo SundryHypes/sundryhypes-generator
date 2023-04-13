@@ -21,7 +21,7 @@ def generate_text_alignment_with_timestamps(audio_file_path, script_file_path):
     config_string = u"task_language=eng|is_text_type=subtitles|os_task_file_format=json" \
                     u"|task_adjust_boundary_nonspeech_min=0.0100" \
                     u"|task_adjust_boundary_nonspeech_string=REMOVE" \
-                    u"|is_audio_file_detect_head_max=20.0" \
+                    u"|is_audio_file_detect_head_max=30.0" \
                     u"|is_audio_file_detect_head_min=0"
     task = Task(config_string=config_string)
 
@@ -49,7 +49,7 @@ def generate_text_clip(from_t, to_t, txt, position, txt_color='#333335',
     if position == 'left_caption':
         text_position = (0.21, 0.78)
     elif position == 'right_caption':
-        text_position = (0.59, 0.78)
+        text_position = (0.58, 0.78)
     elif position == 'episode_number':
         text_position = ('center', 0.042)
     elif position == 'title':
