@@ -134,14 +134,9 @@ def combine_audio_files(list_of_files):
 def convert_dialogue_to_audio(dialogue):
     logger.info(f'Starting synthesiser...')
 
-    #split_lines = split_dialogue_into_lines(dialogue)
-    #list_of_files = request_audio_file_for_each_line(split_lines)
-    #audio_file_paths = combine_audio_files(list_of_files)
-
-    audio_file_paths = {'Combined': '/output/dialog',
-                 'Joined_Mono': '/tmp/audio_files/joined_mono',
-                 'Giulia': '/tmp/audio_files/giulia_combined',
-                 'Marc': '/tmp/audio_files/marc_combined'}
+    split_lines = split_dialogue_into_lines(dialogue)
+    list_of_files = request_audio_file_for_each_line(split_lines)
+    audio_file_paths = combine_audio_files(list_of_files)
 
     audio_file_paths['Audacity'] = request_audacity_audio_enhancement(audio_file_paths['Combined'])
     audio_file_paths['Enhanced'] = request_dolby_audio_enhancement(audio_file_paths['Audacity'])
