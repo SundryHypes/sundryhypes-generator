@@ -10,12 +10,16 @@ from requests.auth import HTTPBasicAuth
 from time import sleep
 
 logger = logging.getLogger('Main_Logger')
+root_dir_path = str(pathlib.Path(__file__).parent.parent) + '/'
 
 
 def get_api_token():
     app_key = '8vQroENnljJYI9AUqYHhkg=='
     app_secret = 'Ik2PNUG8hiT3eQLvSaSz6abBCuCcqc9AK0MACvUpTBI='
     payload = {'grant_type': 'client_credentials', 'expires_in': 3600}
+
+    logger.info('Getting API token...')
+
     response = requests.post('https://api.dolby.io/v1/auth/token', data=payload,
                              auth=HTTPBasicAuth(app_key, app_secret))
 
@@ -50,7 +54,7 @@ def upload_file(headers, file_path):
 
     logger.info(f'Uploading {file_path} to {signed_url}')
 
-    with open(f'./{file_path}', "rb") as input_file:
+    with open(f'{root_dir_path}{file_path}', "rb") as input_file:
         requests.put(signed_url, data=input_file)
 
     return dolby_input_path
@@ -69,6 +73,17 @@ def initiate_audio_enhancement(headers, file_path, dolby_input_path):
             'loudness': {
                 'enable': True,
                 'dialog_intelligence': True
+            },
+            'dynamics': {
+                'range_control': {
+                    'enable': True,
+                    'amount': 'medium'
+                }
+            },
+            'filter': {
+                'dynamic_eq': {
+                    'enable': False
+                }
             },
             'speech': {
                 'sibilance': {'reduction': {
@@ -116,7 +131,6 @@ def wait_for_completion(headers, job_id):
 def download_file(headers, dolby_output_path):
     request_url = 'https://api.dolby.com/media/output'
 
-    root_dir_path = str(pathlib.Path(__file__).parent) + '/'
     output_path = root_dir_path + 'output/dolby_enhancement'
 
     args = {

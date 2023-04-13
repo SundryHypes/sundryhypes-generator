@@ -8,7 +8,7 @@ from config import set_up_logging
 from ideas_finder import get_title_of_todays_trending_wiki_articles
 from archive.archive_maintainer import check_if_topic_discussed_recently, add_entry_to_record
 from content_generator import generate_dialogue_based_on_topic
-from speech_synthesiser import convert_dialogue_to_audio
+from audio_generator.speech_synthesiser import convert_dialogue_to_audio
 from audiogram_generator.main_generator import generate_audiogram
 
 
