@@ -71,15 +71,22 @@ def check_if_topic_discussed_recently(titles):
     current_month = format(today, '%B')
     last_month = format(shift_back_one_month, '%B')
 
+    blocked_topics = ['Drake Bell', 'Cleopatra']
+
     for title in titles:
         logger.info(f'Checking if "{title}" in archive')
-        topic_found = is_topic_in_month(current_month, record, title, year)
-        topic_found = topic_found or is_topic_in_month(
-            last_month, record, title, shift_back_one_month_year)
 
-        if not topic_found:
-            file.close()
-            return topic_found, title
+        if title in blocked_topics:
+            logger.info(f'Topic "{title}" is blocked')
+
+        else:
+            topic_found = is_topic_in_month(current_month, record, title, year)
+            topic_found = topic_found or is_topic_in_month(
+                last_month, record, title, shift_back_one_month_year)
+
+            if not topic_found:
+                file.close()
+                return topic_found, title
 
     return True, None
 

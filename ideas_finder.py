@@ -46,8 +46,6 @@ def get_title_of_todays_trending_wiki_articles():
     response = requests.get(url, headers=headers)
     data = response.json()
 
-    print(data)
-
     title_of_currently_trending_articles = [
         data['mostread']['articles'][0]['titles']['normalized'],
         data['mostread']['articles'][1]['titles']['normalized'],
