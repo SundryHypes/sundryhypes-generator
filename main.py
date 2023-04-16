@@ -25,6 +25,12 @@ def delete_tmp_files():
                 os.remove(file)
 
 
+def remove_thats_right(dialogue):
+    dialogue = dialogue.replace("That's right. ", '')
+
+    return dialogue
+
+
 def remove_awkward_comma_names(dialogue):
     punctuation_signs = ['.', ',', ';', ':', '!', '?', ' ']
     hosts = ['Marc', 'Giulia']
@@ -59,6 +65,8 @@ def main():
         # podcast_dialogue = read_podcast_dialogue_from_file()
 
         podcast_dialogue = remove_awkward_comma_names(podcast_dialogue)
+        podcast_dialogue = remove_thats_right(podcast_dialogue)
+
         path_to_wav_files = convert_dialogue_to_audio(podcast_dialogue)
         generate_audiogram(path_to_wav_files, podcast_dialogue, article_title, episode_number)
 
