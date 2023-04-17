@@ -71,7 +71,7 @@ def check_if_topic_discussed_recently(titles):
     current_month = format(today, '%B')
     last_month = format(shift_back_one_month, '%B')
 
-    blocked_topics = ['Drake Bell', 'Cleopatra']
+    blocked_topics = ['Drake Bell', 'Cleopatra', 'Atique Ahmed']
 
     for title in titles:
         logger.info(f'Checking if "{title}" in archive')

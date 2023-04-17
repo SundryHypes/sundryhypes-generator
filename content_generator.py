@@ -1,6 +1,7 @@
 # Copyright Severin Josef Burg 2023
 # Any unauthorised usage forbidden
 
+import re
 import openai
 import logging
 import pathlib
@@ -72,13 +73,13 @@ def chain_output_in_buffer(requests_buffer, output, prompt, dialogue):
 def get_numbered_part_prompt(number_part, starting_host):
     starting_host_sentence = f'Start with {starting_host}. '
     if number_part == 1:
-        return 'Now continue the dialogue discussing the first item. '\
+        return 'Now continue the dialogue discussing the first item. ' \
                + starting_host_sentence
     elif number_part == 2:
-        return 'Continue the dialogue with a discussion of the second item. '\
+        return 'Continue the dialogue with a discussion of the second item. ' \
                + starting_host_sentence
     elif number_part == 3:
-        return 'Now provide the section of the dialogue discussing the third item. '\
+        return 'Now provide the section of the dialogue discussing the third item. ' \
                + starting_host_sentence + 'Do not provide an outro or any closing statement.'
 
     raise ValueError('So far only supporting three parts!')
@@ -103,10 +104,75 @@ def write_dialogue_to_file(dialogue):
     output_file.close()
 
 
+def update_table_of_content(table, section, content):
+    lines = content.split('\n')
+
+    if section in ['introduction', 'outro']:
+        sub_table = table
+    else:
+        sub_table = table['main']
+
+    if lines[0].startswith('Giulia'):
+        sub_table[section]['first_speaker'] = 'Giulia'
+    elif lines[0].startswith('Marc'):
+        sub_table[section]['first_speaker'] = 'Marc'
+
+    first_verbatim = re.sub(r'^.*: ?', '', lines[0])[:16]
+    sub_table[section]['first_verbatim'] = first_verbatim
+
+    return table
+
+
+def create_table_of_content(content, number_of_parts=None):
+    lines = content.split('\n')
+
+    table = {
+        'introduction': {
+            'first_speaker': None,
+            'first_verbatim': None,
+            'starts_at': None
+        },
+        'main': {
+            'number_of_parts': number_of_parts
+        },
+        'outro': {
+            'first_speaker': None,
+            'first_verbatim': None,
+            'starts_at': None
+        }
+    }
+
+    for line in lines:
+        line = line.strip()
+
+        for i in range(number_of_parts):
+            i += 1
+
+            if line.startswith(f'{i}.'):
+                if ':' in line:
+                    title = re.sub(r':.*', '', line)
+                    description = re.sub(r'^.*: ?', '', line)
+
+                else:
+                    title = line
+                    description = None
+
+                table['main'][f'{i}_topic'] = {
+                    'title': title.replace(f'{i}. ', ''),
+                    'description': description,
+                    'first_speaker': None,
+                    'first_verbatim': None,
+                    'starts_at': None
+                }
+
+    return table
+
+
 def generate_dialogue_based_on_topic(topic):
     logger.info(f'Generating dialogue for topic: "{topic}"')
 
     dialogue = ''
+    number_of_parts = 3
 
     instruction = get_instruction()
     prompt = get_initial_prompt(topic)
@@ -117,25 +183,29 @@ def generate_dialogue_based_on_topic(topic):
     ]
 
     list_of_items_to_treat = send_request(requests_buffer)
+    table_of_content = create_table_of_content(list_of_items_to_treat, number_of_parts)
 
     requests_buffer, introduction, dialogue = chain_output_in_buffer(
         requests_buffer, list_of_items_to_treat, get_intro_prompt(), dialogue)
+    table_of_content = update_table_of_content(table_of_content, 'introduction', introduction)
 
     last_part = introduction
-    number_of_parts = 3
     for i in range(number_of_parts):
         next_host = retrieve_next_host(dialogue)
         requests_buffer, next_part, dialogue = chain_output_in_buffer(
             requests_buffer, last_part, get_numbered_part_prompt(i + 1, next_host), dialogue
         )
         last_part = next_part
+        table_of_content = update_table_of_content(table_of_content, f'{i + 1}_topic', next_part)
 
     next_host = retrieve_next_host(dialogue)
     requests_buffer, next_part, dialogue = chain_output_in_buffer(
         requests_buffer, last_part, get_outro_prompt(next_host), dialogue)
+    table_of_content = update_table_of_content(table_of_content, 'outro', next_part)
 
     logger.info(f'Successfully generated dialogue with {len(dialogue)} characters')
 
     write_dialogue_to_file(dialogue)
+    print(table_of_content)
 
-    return dialogue
+    return dialogue, table_of_content

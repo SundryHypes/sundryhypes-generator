@@ -123,3 +123,5 @@ def generate_video_with_captions(visualisation_clip, audio_files, text_files, ti
     final_clip.write_videofile(f'{root_dir_path}output/final.mp4', threads=4, preset='ultrafast',
                                temp_audiofile="temp-audio.m4a", remove_temp=True,
                                codec="libx264", audio_codec="aac")
+
+    return text_fragments

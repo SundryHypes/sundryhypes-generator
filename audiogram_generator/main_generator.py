@@ -55,6 +55,7 @@ def write_text_to_file(text):
 
     return file_path
 
+
 def generate_textfile(podcast_dialogue):
     lines = podcast_dialogue.split('\n')
     lines = [line.strip() for line in lines]
@@ -69,9 +70,12 @@ def generate_textfile(podcast_dialogue):
 
 
 def generate_audiogram(audio_file_paths, podcast_dialogue, title, episode_number):
+
     text_file_paths = generate_textfile(podcast_dialogue)
     generator = AnimationGenerator(audio_file_paths['Joined_Mono'], audio_file_paths['Enhanced'])
     visualisation_clip = generator.get_animation_clip()
 
     generate_video_with_captions(visualisation_clip, audio_file_paths, text_file_paths,
                                  title, episode_number)
+
+    return text_file_paths

@@ -11,6 +11,7 @@ from archive.archive_maintainer import check_if_topic_discussed_recently, add_en
 from content_generator import generate_dialogue_based_on_topic
 from audio_generator.speech_synthesiser import convert_dialogue_to_audio
 from audiogram_generator.main_generator import generate_audiogram
+from description_generator import generate_video_description
 
 
 def delete_tmp_files():
@@ -49,6 +50,7 @@ def read_podcast_dialogue_from_file():
 
     return podcast_dialogue
 
+
 def main():
     logger = set_up_logging()
     logger.info('Start execution')
@@ -61,14 +63,17 @@ def main():
     if not discussed_recently:
         episode_number = add_entry_to_record(article_title)
 
-        podcast_dialogue = generate_dialogue_based_on_topic(article_title)
+        podcast_dialogue, table_of_content = generate_dialogue_based_on_topic(article_title)
         # podcast_dialogue = read_podcast_dialogue_from_file()
 
         podcast_dialogue = remove_awkward_comma_names(podcast_dialogue)
         podcast_dialogue = remove_thats_right(podcast_dialogue)
 
         path_to_wav_files = convert_dialogue_to_audio(podcast_dialogue)
-        generate_audiogram(path_to_wav_files, podcast_dialogue, article_title, episode_number)
+        text_fragments_with_timestamps = generate_audiogram(path_to_wav_files, podcast_dialogue,
+                                                            article_title, episode_number)
+
+        generate_video_description(table_of_content, text_fragments_with_timestamps)
 
         # delete_tmp_files()
 
