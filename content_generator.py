@@ -3,8 +3,10 @@
 
 import re
 import openai
+import random
 import logging
 import pathlib
+import time
 
 logger = logging.getLogger('Main_Logger')
 root_dir_path = str(pathlib.Path(__file__).parent) + '/'
@@ -24,38 +26,60 @@ def send_request(messages):
 
 
 def get_instruction():
-    instruction = "You are a writer who writes scripts for podcasts. You will develop an engaging " \
-                  "and creative script for the podcast 'Sundry Hypes', a daily podcast which " \
-                  "discusses trending topics. The hosts of this podcast are Giulia and Marc. I will " \
-                  "provide you with a topic and your task is to write an extra long script which " \
-                  "discusses all aspects of the topic and presents valid information. Your goal is " \
-                  "to help listeners come away from the podcast episode with increased knowledge and " \
-                  "insight into the topic. Thus, it is important that your script is comprehensive " \
-                  "and answers any question which a listener might have about the topic. The text " \
-                  "should be formatted as dialogue like the below:\n" \
-                  f"Marc: Welcome to our podcast. My name is Marc.\n" \
-                  f"Giulia: And, my name is Giulia."
+    n = random.randint(0, 1)
+    host_order = [('Giulia', 'Marc'), ('Marc', 'Giulia')]
+    hosts = host_order[n]
+
+    instruction = f"You are writing engaging and creative scripts for the podcast " \
+                  f"'Sundry Hypes', a daily podcast discussing trending topics. " \
+                  f"The co-hosts of this podcast are {hosts[0]} and {hosts[1]}. " \
+                  f"I will provide you with a topic and you will provide me with " \
+                  f"an extra long script in return. The script needs to discusses all " \
+                  f"aspects of the topic in a critical fashion with valid information. Your goal " \
+                  f"is to help listeners understand the topic and increase their knowledge. " \
+                  f"The text should be formatted as dialogue like the below:\n" \
+                  f"{hosts[0]}: Welcome to our podcast. My name is {hosts[0]}.\n" \
+                  f"{hosts[1]}: And, my name is {hosts[1]}."
 
     return instruction
 
 
 def get_initial_prompt(topic):
     chained_prompt = f"The topic for the next episode is '{topic}'. " \
-                     f"First provide me with a list of the three most important " \
-                     f"aspects which this episode must discuss."
+                     f"First, provide me with a list of three important aspects which " \
+                     f"this episode should discuss. Ensure that the three items represent a" \
+                     f"balanced, critical view. The list should be formatted like the below:" \
+                     f"1. Title of the topic" \
+                     f"2. Title of the topic" \
+                     f"3. Title of the topic"
     return chained_prompt
+
+
+# def get_initial_prompt(topic):
+#     chained_prompt = f"In the next episode, we want to discuss the question: 'Tucker Carlson " \
+#                      f"as presidential nominee for the Republican party?' This questions should " \
+#                      f"be discussed based on the following article: " \
+#                      f"https://www.theguardian.com/us-news/2023/apr/27/rick-wilson-tucker-carlson-presidential-nominee-donald-trump-ron-desantis-republicans" \
+#                      f"\n\n" \
+#                      f"First, provide me with a list of three important aspects which " \
+#                      f"this episode should discuss. Ensure that the three items represent a" \
+#                      f"balanced, critical view. The list should be formatted like the below:" \
+#                      f"1. Title of the topic" \
+#                      f"2. Title of the topic" \
+#                      f"3. Title of the topic"
+#     return chained_prompt
 
 
 def get_intro_prompt():
     intro_prompt = 'Now your task is to write the script. First provide the ' \
-                   'dialogue which introduces the episode.'
+                   'dialogue which introduces the episode.' \
 
     return intro_prompt
 
 
 def get_outro_prompt(starting_host):
-    outro_prompt = f'Lastly, finish the dialogue with an outro. The outro should contain a ' \
-                   f'summary of the episode and invite the listeners to tune in again. ' \
+    outro_prompt = f'Lastly, finish the dialogue with an outro. The outro should invite the ' \
+                   f'listeners to tune in again. ' \
                    f'Start with {starting_host}.'
 
     return outro_prompt
@@ -70,17 +94,23 @@ def chain_output_in_buffer(requests_buffer, output, prompt, dialogue):
     return requests_buffer, request_output, dialogue
 
 
-def get_numbered_part_prompt(number_part, starting_host):
+def get_numbered_part_prompt(number_part, table_of_content, starting_host):
+    answer_all_questions_sentence = 'Make sure to answer all questions which a listener might ' \
+                                    'potentially have about this aspect.'
     starting_host_sentence = f'Start with {starting_host}. '
+
+    topic = table_of_content['main'][f'{number_part}_topic']['title']
+
     if number_part == 1:
-        return 'Now continue the dialogue discussing the first item. ' \
-               + starting_host_sentence
+        return f'Now continue the dialogue discussing first item: {topic}. ' \
+               + answer_all_questions_sentence + starting_host_sentence
     elif number_part == 2:
-        return 'Continue the dialogue with a discussion of the second item. ' \
-               + starting_host_sentence
+        return f'Continue the dialogue with a discussion of the second item: {topic}. ' \
+               + answer_all_questions_sentence + starting_host_sentence
     elif number_part == 3:
-        return 'Now provide the section of the dialogue discussing the third item. ' \
-               + starting_host_sentence + 'Do not provide an outro or any closing statement.'
+        return f'Now provide the section of the dialogue discussing the third item: {topic}. ' \
+               + answer_all_questions_sentence + starting_host_sentence +\
+               'Do not provide an outro or any closing statement.'
 
     raise ValueError('So far only supporting three parts!')
 
@@ -189,14 +219,19 @@ def generate_dialogue_based_on_topic(topic):
         requests_buffer, list_of_items_to_treat, get_intro_prompt(), dialogue)
     table_of_content = update_table_of_content(table_of_content, 'introduction', introduction)
 
+    time.sleep(60)
+
     last_part = introduction
     for i in range(number_of_parts):
         next_host = retrieve_next_host(dialogue)
         requests_buffer, next_part, dialogue = chain_output_in_buffer(
-            requests_buffer, last_part, get_numbered_part_prompt(i + 1, next_host), dialogue
+            requests_buffer, last_part,
+            get_numbered_part_prompt(i + 1, table_of_content, next_host), dialogue
         )
         last_part = next_part
         table_of_content = update_table_of_content(table_of_content, f'{i + 1}_topic', next_part)
+
+    time.sleep(60)
 
     next_host = retrieve_next_host(dialogue)
     requests_buffer, next_part, dialogue = chain_output_in_buffer(

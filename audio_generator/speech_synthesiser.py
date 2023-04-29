@@ -2,6 +2,7 @@
 # Any unauthorised usage forbidden
 
 import os
+import random
 import logging
 import pathlib
 import google.cloud.texttospeech as tts
@@ -17,6 +18,27 @@ credential_path = f'{root_dir_path}assets/google_key.json'
 os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = credential_path
 
 
+def text_to_ssml_converter(text):
+    global ssml_text
+
+    short_pause = random.randint(175, 250)
+    long_pause = random.randint(450, 550)
+    extra_long_pause = random.randint(750, 900)
+
+    punctuation_signs = [',', ':']
+    for sign in punctuation_signs:
+        ssml_text = text.replace('{sign} ', f'{sign} <break time="{short_pause}ms"/> ')
+
+    punctuation_signs = ['.', ';', '!', '?']
+    for sign in punctuation_signs:
+        ssml_text = text.replace(f'{sign} ', f'{sign} <break time="{long_pause}ms"/> ')
+
+
+    ssml_text = f'<speak>{ssml_text}<break time="{extra_long_pause}ms"/></speak>'
+
+    return ssml_text
+
+
 def google_text_to_wav(count: int, host_name: str, text: str):
     logger.info(f'Synthesising "{text}"')
 
@@ -25,14 +47,15 @@ def google_text_to_wav(count: int, host_name: str, text: str):
         speaking_rate = 0.93
         pitch = -2.8
     elif host_name == 'marc':
-        voice_name = 'en-GB-News-K'
+        # voice_name = 'en-GB-News-K'
+        voice_name = 'en-GB-Wavenet-B'
         speaking_rate = 0.89
-        pitch = 1.6
+        pitch = -0.8
     else:
         ValueError(f'Unknown host for Google TTS: {host_name}')
 
     language_code = "-".join(voice_name.split('-')[:2])
-    text_input = tts.SynthesisInput(text=text)
+    text_input = tts.SynthesisInput(ssml=text_to_ssml_converter(text))
     voice_params = tts.VoiceSelectionParams(
         language_code=language_code, name=voice_name
     )
@@ -46,7 +69,7 @@ def google_text_to_wav(count: int, host_name: str, text: str):
         input=text_input, voice=voice_params, audio_config=audio_config
     )
 
-    filename = f'tmp/audio_files/{host_name}_{count}.wav'
+    filename = f'{root_dir_path}tmp/audio_files/{host_name}_{count}.wav'
     with open(filename, 'wb') as out:
         out.write(response.audio_content)
 
@@ -93,7 +116,10 @@ def combine_audio_files(list_of_files):
     audio_format = 'wav'
 
     giulia = AudioSegment.empty().set_frame_rate(frame_rate)
+    giulia += AudioSegment.silent(duration=2000, frame_rate=frame_rate)
+
     marc = AudioSegment.empty().set_frame_rate(frame_rate)
+    marc += AudioSegment.silent(duration=2000, frame_rate=frame_rate)
 
     for i, file in enumerate(list_of_files):
         segment = AudioSegment.from_file(file, audio_format)

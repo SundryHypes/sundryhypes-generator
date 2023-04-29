@@ -13,12 +13,12 @@ audio_file_paths = {
 }
 
 text_file_paths = {
-    'Giulia': '/Users/SeverinBurg/Documents/GitHub/sundryhypes-generator/tmp/text_files/woryv.txt',
-    'Marc': '/Users/SeverinBurg/Documents/GitHub/sundryhypes-generator/tmp/text_files/sumfh.txt'
+    'Giulia': '/Users/SeverinBurg/Documents/GitHub/sundryhypes-generator/tmp/text_files/zcojk.txt',
+    'Marc': '/Users/SeverinBurg/Documents/GitHub/sundryhypes-generator/tmp/text_files/aaqhl.txt'
 }
 
-title = 'Dalai Lama'
-episode_number = 5
+title = 'Jeffrey Springer'
+episode_number = 22
 
 generator = AnimationGenerator(audio_file_paths['Joined_Mono'], audio_file_paths['Enhanced'])
 visualisation_clip = generator.get_animation_clip()

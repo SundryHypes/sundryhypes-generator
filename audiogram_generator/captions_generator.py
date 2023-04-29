@@ -7,9 +7,9 @@ import string
 import logging
 import pathlib
 import datetime
-from moviepy import editor
 from aeneas.task import Task
 from aeneas.executetask import ExecuteTask
+from moviepy import editor, VideoFileClip
 
 logger = logging.getLogger('Main_Logger')
 root_dir_path = str(pathlib.Path(__file__).parent.parent) + '/'
@@ -21,8 +21,8 @@ def generate_text_alignment_with_timestamps(audio_file_path, script_file_path):
     config_string = u"task_language=eng|is_text_type=subtitles|os_task_file_format=json" \
                     u"|task_adjust_boundary_nonspeech_min=0.0100" \
                     u"|task_adjust_boundary_nonspeech_string=REMOVE" \
-                    u"|is_audio_file_detect_head_max=30.0" \
-                    u"|is_audio_file_detect_head_min=0"
+                    u"|is_audio_file_detect_head_max=32.0" \
+                    u"|is_audio_file_detect_head_min=2.0"
     task = Task(config_string=config_string)
 
     task.audio_file_path_absolute = root_dir_path + f'{audio_file_path}.wav'
@@ -49,7 +49,7 @@ def generate_text_clip(from_t, to_t, txt, position, txt_color='#333335',
     if position == 'left_caption':
         text_position = (0.21, 0.78)
     elif position == 'right_caption':
-        text_position = (0.58, 0.78)
+        text_position = (0.57, 0.78)
     elif position == 'episode_number':
         text_position = ('center', 0.042)
     elif position == 'title':
@@ -68,6 +68,12 @@ def generate_video_with_captions(visualisation_clip, audio_files, text_files, ti
     subclips = []
     text_fragments = {}
 
+    intro_duration = 7
+    visualisation_start_at = intro_duration - 1
+
+    intro_clip = VideoFileClip(root_dir_path + 'assets/intro.mp4', target_resolution=(1920, 1080))
+    intro_clip = intro_clip.subclip(0, intro_duration)
+
     for key, file_path in text_files.items():
         text_fragments[key] = []
 
@@ -80,30 +86,35 @@ def generate_video_with_captions(visualisation_clip, audio_files, text_files, ti
 
         for fragment in data['fragments']:
             text_fragments[key].append(
-                ((fragment['begin'], fragment['end']), '\n'.join(fragment['lines'])))
+                ((float(fragment['begin']) + visualisation_start_at,
+                  float(fragment['end']) + visualisation_start_at),
+                 '\n'.join(fragment['lines']))
+            )
 
         file.close()
 
     today = datetime.date.today()
     episode_number = f'{number:03} / {today.year}'
     episode_number_clip = generate_text_clip(
-        0, visualisation_clip.duration, f'SUNDRY HYPES • {episode_number}',
+        visualisation_start_at, visualisation_clip.duration,
+        f'SUNDRY HYPES • {episode_number}',
         'episode_number', fontsize=25
     )
-    subclips.append(episode_number_clip)
+    subclips.append(episode_number_clip.crossfadein(1.0))
 
     title_clip = generate_text_clip(
-        0, visualisation_clip.duration, title, 'title', fontsize=40
+        visualisation_start_at, visualisation_clip.duration,
+        title, 'title', fontsize=40
     )
-    subclips.append(title_clip)
+    subclips.append(title_clip.crossfadein(1.0))
 
     background_file_path = root_dir_path + 'assets/background.png'
     background_clip = editor.ImageClip(
         background_file_path,
         transparent=False,
-        duration=visualisation_clip.duration
+        duration= visualisation_clip.duration
     )
-    background_clip.with_start(0)
+    background_clip = background_clip.with_start(visualisation_start_at).crossfadein(1.0)
 
     for (from_t, to_t), txt in text_fragments['Giulia']:
         subclips.append(generate_text_clip(from_t, to_t, txt, 'right_caption'))
@@ -111,10 +122,13 @@ def generate_video_with_captions(visualisation_clip, audio_files, text_files, ti
     for (from_t, to_t), txt in text_fragments['Marc']:
         subclips.append(generate_text_clip(from_t, to_t, txt, 'left_caption'))
 
-    subclips.insert(0, background_clip)
-    subclips.insert(1, visualisation_clip)
+    visualisation_clip = visualisation_clip.with_start(visualisation_start_at).crossfadein(1.0)
+
+    subclips.insert(0, intro_clip)
+    subclips.insert(1, background_clip)
+    subclips.insert(2, visualisation_clip)
     final_clip = editor.CompositeVideoClip(subclips)
-    final_clip = final_clip.with_duration(visualisation_clip.duration)
+    final_clip = final_clip.with_duration(visualisation_clip.duration + intro_duration)
 
     logger.info(f'Saving final clip')
 
@@ -124,4 +138,5 @@ def generate_video_with_captions(visualisation_clip, audio_files, text_files, ti
                                temp_audiofile="temp-audio.m4a", remove_temp=True,
                                codec="libx264", audio_codec="aac")
 
+    print(text_fragments)
     return text_fragments

@@ -5,7 +5,7 @@ import numpy as np
 from math import factorial
 
 
-def savitzky_golay(y, window_size=51, order=3, deriv=0, rate=1):
+def savitzky_golay(y, window_size=101, order=3, deriv=0, rate=1):
     r"""Smooth (and optionally differentiate) data with a Savitzky-Golay filter.
     The Savitzky-Golay filter removes high frequency noise from data.
     It has the advantage of preserving the original shape and

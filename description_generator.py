@@ -39,11 +39,10 @@ def find_start_times(table, text_fragments):
 
 def generate_timestamp(table, text_fragments):
     """
-    TIMESTAMPS
+    TABLE OF CONTENT
     0:00 Intro
     1:00 First Topic Covered
     1:30 Second Topic Covered
-    2:30 Third Topic Covered
     """
     table = find_start_times(table, text_fragments)
 
@@ -77,10 +76,6 @@ def get_general_channel_description():
         Our channel is about <topic>. We cover lots of cool stuff such as <topic>, <topic> and
         <topic>
 
-        Check out our channel here:
-        https://www.youtube.com/channel
-        Don’t forget to subscribe!
-
         FIND US AT
         https://www.website.com/
 
@@ -88,7 +83,6 @@ def get_general_channel_description():
         Contact us on info@company.com
 
         FOLLOW US ON SOCIAL
-        Get updates or reach out to Get updates on our Social Media Profiles!
         Twitter: https://twitter.com/<profile>
         Facebook: https://facebook.com/<profile>
         Instagram: https://twitter.com/<profile>
