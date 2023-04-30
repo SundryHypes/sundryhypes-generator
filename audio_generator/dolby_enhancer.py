@@ -131,7 +131,7 @@ def wait_for_completion(headers, job_id):
 def download_file(headers, dolby_output_path):
     request_url = 'https://api.dolby.com/media/output'
 
-    output_path = root_dir_path + 'output/dolby_enhancement'
+    output_path = root_dir_path + 'output/final_audio'
 
     args = {
         'url': dolby_output_path,

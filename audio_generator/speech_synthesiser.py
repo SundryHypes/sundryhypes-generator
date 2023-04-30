@@ -144,7 +144,7 @@ def combine_audio_files(list_of_files):
     combined = marc.overlay(giulia)
     combined = combined.set_channels(channels)
 
-    filepaths = {'Combined': '/output/dialog',
+    filepaths = {'Combined': '/output/raw_audio',
                  'Joined_Mono': '/tmp/audio_files/joined_mono',
                  'Giulia': '/tmp/audio_files/giulia_combined',
                  'Marc': '/tmp/audio_files/marc_combined'}

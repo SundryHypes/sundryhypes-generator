@@ -64,15 +64,8 @@ def generate_text_clip(from_t, to_t, txt, position, txt_color='#333335',
     return text_clip
 
 
-def generate_video_with_captions(visualisation_clip, audio_files, text_files, title, number):
-    subclips = []
+def generate_text_fragments(text_files, audio_files, visualisation_start_at, content_store):
     text_fragments = {}
-
-    intro_duration = 7
-    visualisation_start_at = intro_duration - 1
-
-    intro_clip = VideoFileClip(root_dir_path + 'assets/intro.mp4', target_resolution=(1920, 1080))
-    intro_clip = intro_clip.subclip(0, intro_duration)
 
     for key, file_path in text_files.items():
         text_fragments[key] = []
@@ -93,6 +86,18 @@ def generate_video_with_captions(visualisation_clip, audio_files, text_files, ti
 
         file.close()
 
+    for key, section in content_store['sections'].items():
+        for (from_t, to_t), txt in text_fragments[section['first_speaker']]:
+            if txt == section['first_verbatim']:
+                section['start_at'] = from_t
+        for (from_t, to_t), txt in text_fragments[section['last_speaker']]:
+            if txt == section['last_verbatim']:
+                section['ends_at'] = to_t
+
+    return text_fragments, content_store
+
+
+def generate_title_section(title, number, visualisation_clip, visualisation_start_at):
     today = datetime.date.today()
     episode_number = f'{number:03} / {today.year}'
     episode_number_clip = generate_text_clip(
@@ -100,19 +105,42 @@ def generate_video_with_captions(visualisation_clip, audio_files, text_files, ti
         f'SUNDRY HYPES • {episode_number}',
         'episode_number', fontsize=25
     )
-    subclips.append(episode_number_clip.crossfadein(1.0))
+
+    episode_number_clip = episode_number_clip.crossfadein(1.0)
 
     title_clip = generate_text_clip(
         visualisation_start_at, visualisation_clip.duration,
         title, 'title', fontsize=40
     )
-    subclips.append(title_clip.crossfadein(1.0))
+
+    title_clip = title_clip.crossfadein(1.0)
+
+    return [episode_number_clip, title_clip]
+
+
+def generate_video_with_captions(visualisation_clip, audio_files, text_files,
+                                 content_store, title, number):
+    subclips = []
+
+    intro_duration = 7
+    visualisation_start_at = intro_duration - 1
+
+    text_fragments, content_store = generate_text_fragments(text_files, audio_files,
+                                                            visualisation_start_at, content_store)
+    print(content_store)
+
+    title_section = generate_title_section(title, number,
+                                           visualisation_clip, visualisation_start_at)
+    subclips.extend(title_section)
+
+    intro_clip = VideoFileClip(root_dir_path + 'assets/intro.mp4', target_resolution=(1920, 1080))
+    intro_clip = intro_clip.subclip(0, intro_duration)
 
     background_file_path = root_dir_path + 'assets/background.png'
     background_clip = editor.ImageClip(
         background_file_path,
         transparent=False,
-        duration= visualisation_clip.duration
+        duration=visualisation_clip.duration
     )
     background_clip = background_clip.with_start(visualisation_start_at).crossfadein(1.0)
 
@@ -134,9 +162,8 @@ def generate_video_with_captions(visualisation_clip, audio_files, text_files, ti
 
     # final_clip.save_frame('frame.png', t=1, with_mask=False)
     # final_clip.preview(fps=30)
-    final_clip.write_videofile(f'{root_dir_path}output/final.mp4', threads=4, preset='ultrafast',
+    final_clip.write_videofile(f'{root_dir_path}output/video.mp4', threads=4, preset='ultrafast',
                                temp_audiofile="temp-audio.m4a", remove_temp=True,
                                codec="libx264", audio_codec="aac")
 
-    print(text_fragments)
     return text_fragments

@@ -55,7 +55,7 @@ class AnimationGenerator:
         self.wavefile_path = f'{root_dir_path}{audio_joined_mono}.wav'
         self.wavefile = wave.open(self.wavefile_path, 'rb')
         self.rate = 44100
-        self.fps = 25
+        self.fps = 30
         self.sample_size = 2
         self.window = 0.5
         self.channels = 2

@@ -3,12 +3,13 @@
 
 import pathlib
 import os
+import json
 
 from config import set_up_logging
 from ideas_finder import search_term_on_wikipedia
 from ideas_finder import get_title_of_todays_trending_wiki_articles
 from archive.archive_maintainer import check_if_topic_discussed_recently, add_entry_to_record
-from content_generator import generate_dialogue_based_on_topic
+from content_generator import generate_dialog_based_on_topic
 from audio_generator.speech_synthesiser import convert_dialogue_to_audio
 from audiogram_generator.main_generator import generate_audiogram
 from description_generator import generate_video_description
@@ -26,29 +27,14 @@ def delete_tmp_files():
                 os.remove(file)
 
 
-def remove_thats_right(dialogue):
-    dialogue = dialogue.replace("That's right. ", '')
-
-    return dialogue
-
-
-def remove_awkward_comma_names(dialogue):
-    punctuation_signs = ['.', ',', ';', ':', '!', '?', ' ']
-    hosts = ['Marc', 'Giulia']
-    for host in hosts:
-        for sign in punctuation_signs:
-            dialogue = dialogue.replace(f', {host}{sign}', sign)
-
-    return dialogue
-
-
-def read_podcast_dialogue_from_file():
+def read_content_store_from_file():
     root_dir_path = str(pathlib.Path(__file__).parent) + '/'
-    file_path = root_dir_path + f'output/dialogue.txt'
+    file_path = root_dir_path + f'output/content_store.txt'
     with open(file_path, 'r') as file:
-        podcast_dialogue = file.read()
+        data = file.read()
+        content_store = json.loads(data)
 
-    return podcast_dialogue, None
+    return content_store, None
 
 
 def main():
@@ -64,17 +50,14 @@ def main():
     if not discussed_recently:
         episode_number = add_entry_to_record(article_title)
 
-        # podcast_dialogue, table_of_content = generate_dialogue_based_on_topic(article_title)
-        podcast_dialogue, table_of_content = read_podcast_dialogue_from_file()
+        # content_store = generate_dialogue_based_on_topic(article_title)
+        content_store = read_content_store_from_file()
 
-        podcast_dialogue = remove_awkward_comma_names(podcast_dialogue)
-        podcast_dialogue = remove_thats_right(podcast_dialogue)
-
-        path_to_wav_files = convert_dialogue_to_audio(podcast_dialogue)
-        text_fragments_with_timestamps = generate_audiogram(path_to_wav_files, podcast_dialogue,
+        path_to_wav_files = convert_dialogue_to_audio(content_store['dialog'])
+        text_fragments_with_timestamps = generate_audiogram(path_to_wav_files, content_store,
                                                             article_title, episode_number)
 
-        generate_video_description(table_of_content, text_fragments_with_timestamps)
+        generate_video_description(content_store, text_fragments_with_timestamps)
 
         # delete_tmp_files()
 
