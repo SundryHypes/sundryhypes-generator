@@ -1,10 +1,15 @@
-table = {
-    'sub_table': {
-        'content': 'sub_table_content'
-    }
-}
+import random
 
-sub_table = table['sub_table']
-sub_table['content'] = 'new_content'
+input_list = ['file_1', 'file_2']
 
-print(table)
+print(input_list)
+
+def select_delete_random_item_from_list(input_list):
+    index = random.randint(0, len(input_list) - 1)
+    item = input_list[index]
+    del input_list[index]
+    return item
+
+print(select_delete_random_item_from_list(input_list))
+
+print(input_list)

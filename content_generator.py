@@ -7,7 +7,7 @@ import random
 import logging
 import pathlib
 import time
-import json
+import pickle
 
 from helpers import remove_awkward_comma_names, remove_thats_right
 
@@ -78,7 +78,7 @@ def get_initial_prompt(topic):
 
 def get_intro_prompt():
     intro_prompt = 'Now your task is to write the script. First provide the ' \
-                   'dialog which introduces the episode.' \
+                   'dialog which introduces the episode.'
 
     return intro_prompt
 
@@ -109,7 +109,7 @@ def get_numbered_part_prompt(number_part, content_store, starting_host):
                                     'potentially have about this aspect.'
     starting_host_sentence = f'Start with {starting_host}. '
 
-    topic = content_store['sections'][f'{number_part}_topic']['title']
+    topic = content_store['sections'][f'{number_part}_topic'].title
 
     if number_part == 1:
         return f'Now continue the dialog discussing first item: {topic}. ' \
@@ -119,7 +119,7 @@ def get_numbered_part_prompt(number_part, content_store, starting_host):
                + answer_all_questions_sentence + starting_host_sentence
     elif number_part == 3:
         return f'Now provide the section of the dialog discussing the third item: {topic}. ' \
-               + answer_all_questions_sentence + starting_host_sentence +\
+               + answer_all_questions_sentence + starting_host_sentence + \
                'Do not provide an outro or any closing statement.'
 
     raise ValueError('So far only supporting three parts!')
@@ -138,55 +138,50 @@ def retrieve_next_host(dialog, female_host_name='Giulia', male_host_name='Marc')
 def write_content_store_to_file(content_store):
     logger.info('Saving content store to file...')
 
-    file_path = root_dir_path + f'output/content_store.txt'
-    output_file = open(file_path, "w")
-    output_file.write(json.dumps(content_store))
-    output_file.close()
+    file_path = root_dir_path + f'output/content_store.bin'
+    with open(file_path, 'wb') as output_file:
+        pickle.dump(content_store, output_file)
 
 
 def update_content_store(store, section, content):
     lines = content.split('\n')
 
     if lines[0].startswith('Giulia'):
-        store['sections'][section]['first_speaker'] = 'Giulia'
+        store['sections'][section].first_speaker = 'Giulia'
     elif lines[0].startswith('Marc'):
-        store['sections'][section]['first_speaker'] = 'Marc'
+        store['sections'][section].first_speaker = 'Marc'
 
     if lines[-1].startswith('Giulia'):
-        store['sections'][section]['last_speaker'] = 'Giulia'
+        store['sections'][section].last_speaker = 'Giulia'
     elif lines[-1].startswith('Marc'):
-        store['sections'][section]['last_speaker'] = 'Marc'
+        store['sections'][section].last_speaker = 'Marc'
 
-    store['sections'][section]['dialog'] = content
+    store['sections'][section].dialog = content
 
     return store
 
+
+class Section:
+    def __init__(self, name, first_speaker=None, last_speaker=None, dialog='', starts_at=None,
+                 ends_at=None, first_verbatim=None, last_verbatim=None, title=None,
+                 description=None):
+        self.name = name
+        self.first_speaker = first_speaker
+        self.last_speaker = last_speaker
+        self.dialog = dialog
+        self.starts_at = starts_at
+        self.ends_at = ends_at
+        self.first_verbatim = first_verbatim
+        self.last_verbatim = last_verbatim
+        self.title = title
+        self.description = description
 
 def create_content_store(list_of_items, number_of_parts=None):
     lines = list_of_items.split('\n')
 
     content = {
         'dialog': '',
-        'sections': {
-            'introduction': {
-                'first_speaker': None,
-                'last_speaker': None,
-                'dialog': '',
-                'starts_at': None,
-                'ends_at': None,
-                'first_verbatim': None,
-                'last_verbatim': None
-            },
-            'outro': {
-                'first_speaker': None,
-                'last_speaker': None,
-                'dialog': '',
-                'starts_at': None,
-                'ends_at': None,
-                'first_verbatim': None,
-                'last_verbatim': None
-            }
-        }
+        'sections': {'introduction': Section(name='introduction')}
     }
 
     for line in lines:
@@ -204,17 +199,11 @@ def create_content_store(list_of_items, number_of_parts=None):
                     title = line
                     description = None
 
-                content['sections'][f'{i}_topic'] = {
-                    'title': title.replace(f'{i}. ', ''),
-                    'description': description,
-                    'first_speaker': None,
-                    'last_speaker': None,
-                    'dialog': '',
-                    'starts_at': None,
-                    'ends_at': None,
-                    'first_verbatim': None,
-                    'last_verbatim': None
-                }
+                content['sections'][f'{i}_topic'] = Section(name=f'{i}_topic',
+                                                            title=title.replace(f'{i}. ', ''),
+                                                            description=description)
+
+    content['sections']['outro'] = Section(name='outro')
 
     return content
 
@@ -264,5 +253,3 @@ def generate_dialog_based_on_topic(topic):
     print(content_store)
 
     return content_store
-
-generate_dialog_based_on_topic('Deplatforming of Tucker Carlson')

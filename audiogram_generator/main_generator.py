@@ -59,17 +59,29 @@ def generate_text_files(content_store):
     giulia, marc = [], []
 
     for key, section in content_store['sections'].items():
-        lines = section['dialog'].split('\n')
+        lines = section.dialog.split('\n')
         lines = [line.strip() for line in lines]
 
-        list_of_phrases = {'Giulia': return_host_specific_phrases('Giulia', lines, 'Marc'),
-                           'Marc': return_host_specific_phrases('Marc', lines, 'Giulia')}
+        phrases = {'Giulia': return_host_specific_phrases('Giulia', lines, 'Marc'),
+                   'Marc': return_host_specific_phrases('Marc', lines, 'Giulia')}
 
-        section['first_verbatim'] = list_of_phrases[section['first_speaker']][0]
-        section['last_verbatim'] = list_of_phrases[section['last_speaker']][-1]
+        if '\n' not in phrases[section.first_speaker][0]:
+            first_verbatim = [phrases[section.first_speaker][0],
+                              phrases[section.first_speaker][1].replace('\n', '')]
+        else:
+            first_verbatim = [phrases[section.first_speaker][0]]
 
-        giulia.append('\n'.join(list_of_phrases['Giulia']))
-        marc.append('\n'.join(list_of_phrases['Marc']))
+        if '\n' not in phrases[section.first_speaker][-2]:
+            last_verbatim = [phrases[section.last_speaker][-2],
+                             phrases[section.last_speaker][-1].replace('\n', '')]
+        else:
+            last_verbatim = [phrases[section.last_speaker][-1].replace('\n', '')]
+
+        section.first_verbatim = '\n'.join(first_verbatim)
+        section.last_verbatim = '\n'.join(last_verbatim)
+
+        giulia.append('\n'.join(phrases['Giulia']))
+        marc.append('\n'.join(phrases['Marc']))
 
     text_file_paths = {'Giulia': write_text_to_file('giulia', '\n'.join(giulia)),
                        'Marc': write_text_to_file('marc', '\n'.join(marc))}
@@ -82,7 +94,8 @@ def generate_audiogram(audio_file_paths, content_store, title, episode_number):
     generator = AnimationGenerator(audio_file_paths['Joined_Mono'], audio_file_paths['Enhanced'])
     visualisation_clip = generator.get_animation_clip()
 
-    generate_video_with_captions(visualisation_clip, audio_file_paths, text_file_paths,
-                                 content_store, title, episode_number)
+    content_store = generate_video_with_captions(visualisation_clip, audio_file_paths,
+                                                 text_file_paths, content_store, title,
+                                                 episode_number)
 
-    return text_file_paths
+    return content_store
