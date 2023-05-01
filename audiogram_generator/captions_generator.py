@@ -111,7 +111,7 @@ def generate_title_section(title, number, visualisation_clip, visualisation_star
     today = datetime.date.today()
     episode_number = f'{number:03} / {today.year}'
     episode_number_clip = generate_text_clip(
-        visualisation_start_at, visualisation_clip.duration,
+        visualisation_start_at, visualisation_clip.duration + visualisation_start_at,
         f'SUNDRY HYPES • {episode_number}',
         'episode_number', fontsize=25
     )
@@ -119,7 +119,7 @@ def generate_title_section(title, number, visualisation_clip, visualisation_star
     episode_number_clip = episode_number_clip.crossfadein(1.0)
 
     title_clip = generate_text_clip(
-        visualisation_start_at, visualisation_clip.duration,
+        visualisation_start_at, visualisation_clip.duration + visualisation_start_at,
         title, 'title', fontsize=40
     )
 
