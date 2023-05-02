@@ -17,7 +17,7 @@ root_dir_path = str(pathlib.Path(__file__).parent.parent) + '/'
 
 
 def generate_text_alignment_with_timestamps(audio_file_path, script_file_path):
-    logger.info(f'Force alignment of text to audio')
+    logger.info(f'Force alignment of text to audio for {script_file_path}')
 
     config_string = u"task_language=eng|is_text_type=subtitles|os_task_file_format=json" \
                     u"|task_adjust_boundary_nonspeech_min=0.0100" \
@@ -43,8 +43,6 @@ def generate_text_alignment_with_timestamps(audio_file_path, script_file_path):
 
 def generate_text_clip(from_t, to_t, txt, position, txt_color='#333335',
                        fontsize=50, font='SF-Pro'):
-    logger.info(f'Generating text clip for "{txt}"')
-
     text_clip = editor.TextClip(txt, font_size=fontsize, font=font, color=txt_color)
 
     if position == 'left_caption':
@@ -108,6 +106,8 @@ def update_content_store_with_timestamps(content_store, text_fragments):
 
 
 def generate_title_section(title, number, visualisation_clip, visualisation_start_at):
+    logger.info(f'Generating title section...')
+
     today = datetime.date.today()
     episode_number = f'{number:03} / {today.year}'
     episode_number_clip = generate_text_clip(
@@ -129,6 +129,8 @@ def generate_title_section(title, number, visualisation_clip, visualisation_star
 
 
 def generate_captions_clips(text_fragments):
+    logger.info(f'Generating captions...')
+
     captions_clips = []
 
     for (from_t, to_t), txt in text_fragments['Giulia']:
@@ -148,6 +150,8 @@ def select_delete_random_item_from_list(input_list):
 
 
 def generate_music_clips(content_store):
+    logger.info(f'Generating background music...')
+
     music_clips = []
     background_music = []
 
@@ -155,12 +159,12 @@ def generate_music_clips(content_store):
 
     for file_name in os.listdir(music_folder):
         file = f'{music_folder}/{file_name}'
-        if os.path.isfile(file):
+        if os.path.isfile(file) and file.endswith(".mp3"):
             background_music.append(file)
 
     for key, section in content_store['sections'].items():
         song = select_delete_random_item_from_list(background_music)
-        music_clip = AudioFileClip(song).with_start(section.starts_at)
+        music_clip = AudioFileClip(song)
         music_clip = music_clip.with_start(section.starts_at).audio_fadein(1.0)
         music_clip = music_clip.with_end(section.ends_at).audio_fadeout(1.0)
 
@@ -212,12 +216,12 @@ def generate_video_with_captions(visualisation_clip, audio_files, text_files,
     final_clip.audio = editor.CompositeAudioClip(audio_subclips)
     final_clip = final_clip.with_duration(visualisation_clip.duration + intro_duration)
 
-    logger.info(f'Saving final clip')
+    logger.info(f'Generating final clip...')
 
     # final_clip.save_frame('frame.png', t=1, with_mask=False)
     # final_clip.preview(fps=30)
     final_clip.write_videofile(f'{root_dir_path}output/video.mp4', threads=4, preset='ultrafast',
-                               temp_audiofile="temp-audio.m4a", remove_temp=True,
+                               temp_audiofile="temp-audio.m4a", remove_temp=False,
                                codec="libx264", audio_codec="aac")
 
     return content_store

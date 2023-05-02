@@ -22,8 +22,8 @@ text_file_paths = {
             'script_marc.txt'
 }
 
-title = 'Deplatforming of Tucker Carlson'
-episode_number = 23
+title = 'Increase of Private Jet Sales'
+episode_number = 24
 
 generator = AnimationGenerator(audio_file_paths['Joined_Mono'], audio_file_paths['Enhanced'])
 visualisation_clip = generator.get_animation_clip()

@@ -59,13 +59,12 @@ def get_instruction():
 
 
 def get_initial_prompt(topic):
-    chained_prompt = f"In the next episode, we want to discuss 'Deplatforming'-" \
-                     f"More specifically, we want to discuss the deplatforming of Tucker Carlson " \
-                     f"in the light of Alexandria Ocasio-Cortez's opinion about deplatforming. " \
-                     f"Deplatforming of Tucker Carlson: https://www.latimes.com/entertainment-arts/business/story/2023-04-24/tucker-carlson-is-out-at-fox-news" \
-                     f"Alexandria Ocasio-Cortez's " \
-                     f"opinion: https://www.nationalreview.com/corner/alexandria-ocasio-cortez-is" \
-                     f"-right-deplatforming-works/" \
+    chained_prompt = f"In the next episode, we want to discuss 'Increase of Private Jet Sales'." \
+                     f"More specifically, we want to discuss the fact that the sales have been" \
+                     f"constantly increasing over the last two decades and what this means" \
+                     f"for the environment in the light of climate change. Take the below article" \
+                     f"as an input and inspiration for the script." \
+                     f"Private jet sales likely to reach highest ever level this year: https://www.theguardian.com/world/2023/may/01/private-jet-sales-likely-to-reach-highest-ever-level-this-year-report-says" \
                      f"\n\n" \
                      f"First, provide me with a list of three important aspects which " \
                      f"this episode should discuss. Ensure that the three items represent a" \

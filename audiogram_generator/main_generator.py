@@ -71,7 +71,7 @@ def generate_text_files(content_store):
         else:
             first_verbatim = [phrases[section.first_speaker][0]]
 
-        if '\n' not in phrases[section.first_speaker][-2]:
+        if '\n' not in phrases[section.last_speaker][-2]:
             last_verbatim = [phrases[section.last_speaker][-2],
                              phrases[section.last_speaker][-1].replace('\n', '')]
         else:

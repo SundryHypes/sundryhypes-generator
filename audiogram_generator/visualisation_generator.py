@@ -5,6 +5,7 @@ import math
 import wave
 import struct
 import pathlib
+import logging
 import numpy as np
 import matplotlib.pyplot as plt
 from statistics import mean
@@ -16,6 +17,7 @@ from audiogram_generator.audio_visualiser_scripts.savitzky_golay import savitzky
 from audiogram_generator.audio_visualiser_scripts.polar_coordinates_converter \
     import convert_to_polar_coordinates
 
+logger = logging.getLogger('Main_Logger')
 root_dir_path = str(pathlib.Path(__file__).parent.parent) + '/'
 
 class AnimationClip(VideoClip):
@@ -275,4 +277,6 @@ class AnimationGenerator:
         return animation_clip
 
     def get_animation_clip(self):
+        logger.info(f'Generating visualisation...')
+
         return self.__record_animation()
