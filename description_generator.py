@@ -37,14 +37,13 @@ def find_start_times(table, text_fragments):
     return table
 
 
-def generate_timestamp(table, text_fragments):
+def generate_timestamp(content_store):
     """
     TABLE OF CONTENT
     0:00 Intro
     1:00 First Topic Covered
     1:30 Second Topic Covered
     """
-    table = find_start_times(table, text_fragments)
 
     description = 'TABLE OF CONTENT\n'
 
@@ -91,12 +90,12 @@ def get_general_channel_description():
     raise NotImplementedError
 
 
-def generate_video_description(table_of_content, text_fragments):
+def generate_video_description(content_store):
     logger.info(f'Generating description...')
 
     description = ''
     # description += generate_intro()
-    description += generate_timestamp(table_of_content, text_fragments) + '\n\n'
+    description += generate_timestamp(content_store) + '\n\n'
     # description += generate_video_recommendations()
     # description += get_general_channel_description()
 

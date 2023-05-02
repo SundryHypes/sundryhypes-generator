@@ -22,7 +22,7 @@ def return_host_specific_phrases(name, lines, other_host_name):
             if not line.startswith(other_host_name) and not len(line) == 0:
                 raise ValueError('Found line of pure content, i.e. not starting with host name!')
 
-    return '\n'.join(list_of_groups)
+    return list_of_groups
 
 
 def group_words(line, name, min_length_string=17, max_length_string=25):
@@ -46,9 +46,8 @@ def group_words(line, name, min_length_string=17, max_length_string=25):
     return grouped_words
 
 
-def write_text_to_file(text):
-    filename = ''.join(random.choices(string.ascii_lowercase, k=5))
-    file_path = root_dir_path + f'tmp/text_files/{filename}.txt'
+def write_text_to_file(host_name, text):
+    file_path = root_dir_path + f'tmp/text_files/script_{host_name}.txt'
     output_file = open(file_path, "w")
     output_file.write(text)
     output_file.close()
@@ -56,26 +55,47 @@ def write_text_to_file(text):
     return file_path
 
 
-def generate_textfile(podcast_dialogue):
-    lines = podcast_dialogue.split('\n')
-    lines = [line.strip() for line in lines]
+def generate_text_files(content_store):
+    giulia, marc = [], []
 
-    giulia_phrases = return_host_specific_phrases('Giulia', lines, 'Marc')
-    marc_phrases = return_host_specific_phrases('Marc', lines, 'Giulia')
+    for key, section in content_store['sections'].items():
+        lines = section.dialog.split('\n')
+        lines = [line.strip() for line in lines]
 
-    text_file_paths = {'Giulia': write_text_to_file(giulia_phrases),
-                       'Marc': write_text_to_file(marc_phrases)}
+        phrases = {'Giulia': return_host_specific_phrases('Giulia', lines, 'Marc'),
+                   'Marc': return_host_specific_phrases('Marc', lines, 'Giulia')}
 
-    return text_file_paths
+        if '\n' not in phrases[section.first_speaker][0]:
+            first_verbatim = [phrases[section.first_speaker][0],
+                              phrases[section.first_speaker][1].replace('\n', '')]
+        else:
+            first_verbatim = [phrases[section.first_speaker][0]]
+
+        if '\n' not in phrases[section.last_speaker][-2]:
+            last_verbatim = [phrases[section.last_speaker][-2],
+                             phrases[section.last_speaker][-1].replace('\n', '')]
+        else:
+            last_verbatim = [phrases[section.last_speaker][-1].replace('\n', '')]
+
+        section.first_verbatim = '\n'.join(first_verbatim)
+        section.last_verbatim = '\n'.join(last_verbatim)
+
+        giulia.append('\n'.join(phrases['Giulia']))
+        marc.append('\n'.join(phrases['Marc']))
+
+    text_file_paths = {'Giulia': write_text_to_file('giulia', '\n'.join(giulia)),
+                       'Marc': write_text_to_file('marc', '\n'.join(marc))}
+
+    return text_file_paths, content_store
 
 
-def generate_audiogram(audio_file_paths, podcast_dialogue, title, episode_number):
-
-    text_file_paths = generate_textfile(podcast_dialogue)
+def generate_audiogram(audio_file_paths, content_store, title, episode_number):
+    text_file_paths, content_store = generate_text_files(content_store)
     generator = AnimationGenerator(audio_file_paths['Joined_Mono'], audio_file_paths['Enhanced'])
     visualisation_clip = generator.get_animation_clip()
 
-    generate_video_with_captions(visualisation_clip, audio_file_paths, text_file_paths,
-                                 title, episode_number)
+    content_store = generate_video_with_captions(visualisation_clip, audio_file_paths,
+                                                 text_file_paths, content_store, title,
+                                                 episode_number)
 
-    return text_file_paths
+    return content_store

@@ -76,8 +76,8 @@ def google_text_to_wav(count: int, host_name: str, text: str):
     return filename
 
 
-def split_dialogue_into_lines(dialogue):
-    lines = dialogue.split('\n')
+def split_dialog_into_lines(dialog):
+    lines = dialog.split('\n')
 
     return lines
 
@@ -144,7 +144,7 @@ def combine_audio_files(list_of_files):
     combined = marc.overlay(giulia)
     combined = combined.set_channels(channels)
 
-    filepaths = {'Combined': '/output/dialog',
+    filepaths = {'Combined': '/output/raw_audio',
                  'Joined_Mono': '/tmp/audio_files/joined_mono',
                  'Giulia': '/tmp/audio_files/giulia_combined',
                  'Marc': '/tmp/audio_files/marc_combined'}
@@ -157,10 +157,10 @@ def combine_audio_files(list_of_files):
     return filepaths
 
 
-def convert_dialogue_to_audio(dialogue):
+def convert_dialog_to_audio(dialog):
     logger.info(f'Starting synthesiser...')
 
-    split_lines = split_dialogue_into_lines(dialogue)
+    split_lines = split_dialog_into_lines(dialog)
     list_of_files = request_audio_file_for_each_line(split_lines)
     audio_file_paths = combine_audio_files(list_of_files)
 

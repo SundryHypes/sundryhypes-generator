@@ -31,7 +31,11 @@ def add_entry_to_record(title: str):
         else:
             record[year][month].append(new_entry)
 
-        episode_number = max(episode['episode_number'] for episode in record[year][month]) + 1
+        episode_numbers = []
+        for key, months in record[year].items():
+            for episode in months:
+                episode_numbers.append(episode['episode_number'])
+        episode_number = max(episode_numbers) + 1
         record[year][month][-1]['episode_number'] = episode_number
 
     with open('archive/record.json', 'w') as file:
