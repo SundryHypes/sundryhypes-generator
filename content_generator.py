@@ -59,18 +59,16 @@ def get_instruction():
 
 
 def get_initial_prompt(topic):
-    chained_prompt = f"In the next episode, we want to discuss 'Increase of Private Jet Sales'." \
-                     f"More specifically, we want to discuss the fact that the sales have been" \
-                     f"constantly increasing over the last two decades and what this means" \
-                     f"for the environment in the light of climate change. Take the below article" \
-                     f"as an input and inspiration for the script." \
-                     f"Private jet sales likely to reach highest ever level this year: https://www.theguardian.com/world/2023/may/01/private-jet-sales-likely-to-reach-highest-ever-level-this-year-report-says" \
+    chained_prompt = f"In the next episode, we want to discuss Tori Bowie who became famous for " \
+                     f"wining three Olympic medals but unfortunately died only aged 32." \
+                     f"Use this article to enrich the episode script: " \
+                     f"https://edition.cnn.com/2023/05/03/sport/tori-bowie-death-track-and-field-spt-intl/index.html" \
                      f"\n\n" \
                      f"First, provide me with a list of three important aspects which " \
                      f"this episode should discuss. Ensure that the three items represent a" \
-                     f"balanced, critical view. The list should be formatted like the below:" \
-                     f"1. Title of the topic" \
-                     f"2. Title of the topic" \
+                     f"balanced, critical view. The list should be formatted like the below:\n" \
+                     f"1. Title of the topic\n" \
+                     f"2. Title of the topic\n" \
                      f"3. Title of the topic"
     return chained_prompt
 
@@ -227,8 +225,6 @@ def generate_dialog_based_on_topic(topic):
         requests_buffer, list_of_items_to_treat, get_intro_prompt(), content_store['dialog'])
     content_store = update_content_store(content_store, 'introduction', introduction)
 
-    time.sleep(60)
-
     last_part = introduction
     for i in range(number_of_parts):
         next_host = retrieve_next_host(content_store['dialog'])
@@ -238,8 +234,6 @@ def generate_dialog_based_on_topic(topic):
         )
         last_part = next_part
         content_store = update_content_store(content_store, f'{i + 1}_topic', next_part)
-
-    time.sleep(60)
 
     next_host = retrieve_next_host(content_store['dialog'])
     requests_buffer, next_part, content_store['dialog'] = chain_output_in_buffer(

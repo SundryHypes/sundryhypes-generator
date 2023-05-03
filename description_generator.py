@@ -18,25 +18,6 @@ def generate_intro():
     raise NotImplementedError
 
 
-def find_start_times(table, text_fragments):
-
-    def update_table(sub_table, section):
-        first_speaker = sub_table[section]['first_speaker']
-        for (from_t, to_t), txt in text_fragments[first_speaker]:
-            if sub_table[section]['first_verbatim'] in txt.replace('\n', ' '):
-                sub_table[section]['starts_at'] = from_t
-
-    for part in ['introduction', 'outro']:
-        sub = table
-        update_table(sub, part)
-
-    for i in range(table['main']['number_of_parts']):
-        sub = table['main']
-        update_table(sub, f'{i + 1}_topic')
-
-    return table
-
-
 def generate_timestamp(content_store):
     """
     TABLE OF CONTENT
@@ -44,17 +25,18 @@ def generate_timestamp(content_store):
     1:00 First Topic Covered
     1:30 Second Topic Covered
     """
+    timestamps = ''
 
-    description = 'TABLE OF CONTENT\n'
+    for key, section in content_store['sections'].items():
+        time = section.starts_at
+        if section.name == 'introduction':
+            timestamps += '0:00 Introduction\n'
+        if section.name == 'outro':
+            timestamps += f'{int(time / 60)}:{int(time % 60)} Outro'
+        else:
+            timestamps += f'{int(time / 60)}:{int(time % 60)} {section.title}\n'
 
-    description += f"{table['introduction']['starts_at']} Introduction\n"
-
-    for section, details in table['main'].items():
-        description += f"{details['starts_at']} {details['title']}\n"
-
-    description += f"{table['outro']['starts_at']} Outro"
-
-    return description
+    return timestamps
 
 
 def generate_video_recommendations():

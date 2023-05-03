@@ -49,8 +49,8 @@ def main():
     logger.info('Start execution')
 
     # article_titles = get_title_of_todays_trending_wiki_articles()
-    # article_titles = search_term_on_wikipedia("Tucker Carlson")
-    article_titles = ['Increase of Private Jet Sales']
+    article_titles = search_term_on_wikipedia("Tori Bowie")
+    # article_titles = ['Increase of Private Jet Sales']
 
     discussed_recently, article_title = check_if_topic_discussed_recently(article_titles)
 
